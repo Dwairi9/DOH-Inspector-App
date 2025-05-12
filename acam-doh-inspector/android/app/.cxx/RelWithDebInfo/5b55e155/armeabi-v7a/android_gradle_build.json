@@ -1,0 +1,28 @@
+{
+  "buildFiles": [
+    "C:\\Work\\Accela\\Flutter\\flutter\\packages\\flutter_tools\\gradle\\src\\main\\groovy\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\AhmadAldwiri\\AppData\\Local\\Android\\Sdk\\cmake\\3.18.1\\bin\\ninja.exe",
+      "-C",
+      "C:\\Work\\Accela\\Inspector App Updated\\health-care-facility-app 1 (1)\\health-care-facility-app\\ADDOH\\acam-doh-inspector\\android\\app\\.cxx\\RelWithDebInfo\\5b55e155\\armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\AhmadAldwiri\\AppData\\Local\\Android\\Sdk\\cmake\\3.18.1\\bin\\ninja.exe",
+    "-C",
+    "C:\\Work\\Accela\\Inspector App Updated\\health-care-facility-app 1 (1)\\health-care-facility-app\\ADDOH\\acam-doh-inspector\\android\\app\\.cxx\\RelWithDebInfo\\5b55e155\\armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {},
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "C:\\Users\\AhmadAldwiri\\AppData\\Local\\Android\\Sdk\\ndk\\26.3.11579264\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang.exe",
+      "cppCompilerExecutable": "C:\\Users\\AhmadAldwiri\\AppData\\Local\\Android\\Sdk\\ndk\\26.3.11579264\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": []
+}

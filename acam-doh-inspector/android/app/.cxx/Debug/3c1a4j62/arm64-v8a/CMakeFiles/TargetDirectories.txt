@@ -1,0 +1,2 @@
+C:/Work/Accela/DOH-Inspector/health-care-facility-app/ADDOH/acam-doh-inspector/android/app/.cxx/Debug/3c1a4j62/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Work/Accela/DOH-Inspector/health-care-facility-app/ADDOH/acam-doh-inspector/android/app/.cxx/Debug/3c1a4j62/arm64-v8a/CMakeFiles/rebuild_cache.dir
