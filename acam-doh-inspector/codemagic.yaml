@@ -1,0 +1,30 @@
+workflows:
+ hello-world:
+  name: Hello world workflow
+  max_build_duration: 100
+  environment:
+    flutter: stable
+    xcode: latest
+    cocoapods: 1.9.1
+    node: 23.14.0
+    npm: 6.13.7
+    ndk: r21d
+    java: 1.8
+    ruby: 2.7.2
+  cache:
+    cache_paths:
+      - $HOME/.gradle/caches
+      - $FLUTTER_ROOT/.pub-cache
+      - $HOME/laibrary/Caches/CocoaPods
+      - $CM_BUILD_DIR/node_modules
+  scripts:
+    - name: Get Flutter Packages
+      script: flutter packages pub get
+    - name: Build apk
+      script: flutter build apk --release
+    - name: build IOS
+      script: flutter build ios
+  artifacts:
+    - build/**/outputs/apk/**/*.apk
+    - build/**/outputs/**/*.aab 
+
