@@ -23,6 +23,7 @@ import 'package:aca_mobile_app/views/component_manager_view.dart';
 import 'package:aca_mobile_app/views/dohaudits/audit_visit_reports_view.dart';
 import 'package:aca_mobile_app/views/dohaudits/audit_visit_result_view.dart';
 import 'package:aca_mobile_app/views/dohaudits/violations/audit_visit_violation_view.dart';
+import 'package:aca_mobile_app/views/dohaudits/violations/violation_attachment_view.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -283,22 +284,41 @@ class AuditVisitView extends ConsumerWidget {
                  if(provider.isSaving) {
                    return;
                  }
+
                  var actionObject = await provider.submitViolation();
 
                  if (actionObject.success) {
                    if (fullScreenContext.mounted) AcamUtility.showMessageForActionObject(fullScreenContext, actionObject);
 
-                   provider.loadAuditVisit();
-                   ref.read(currentAuditVisitListProvider).loadInspections();
-                   ref.read(previousAuditVisitListProvider).loadInspections();
+                   // provider.loadAuditVisit();
+                   // ref.read(currentAuditVisitListProvider).loadInspections();
+                   // ref.read(previousAuditVisitListProvider).loadInspections();
 
-                   if (fullScreenContext.mounted) Navigator.pop(fullScreenContext);
+                    if (fullScreenContext.mounted) {
+                      showViolationAttachments(context, ref);
+                    }
                  }
                  else {
                   provider.setErrorMessage(actionObject.message);
                  }
               })
     ], onClose: (BuildContext context) {
+      provider.clearViolation();
+      Navigator.pop(context);
+    });
+  }
+
+  showViolationAttachments(BuildContext context, WidgetRef ref) {
+    ref.read(currentAuditVisitListProvider).loadInspections();
+
+    WidgetUtil.showFullScreenDialog(
+        context,
+        ViolationAttachmentView(
+          auditVisitViewProvider: auditVisitViewProvider,
+        ),
+        "Attachments".tr(),
+        subtitle: ref.read(auditVisitViewProvider).violationInformation?.violationCustomId,
+        [], onClose: (BuildContext context) {
       Navigator.pop(context);
     });
   }

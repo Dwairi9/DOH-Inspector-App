@@ -42,11 +42,11 @@ class RecordId {
 
   factory RecordId.fromMap(Map<String, dynamic> map) {
     return RecordId(
-      id2: map['id2'],
-      id1: map['id1'],
-      id3: map['id3'],
-      id: map['id'],
-      customId: map['customId'],
+      id2: map['id2'] ?? "",
+      id1: map['id1'] ?? "",
+      id3: map['id3'] ?? "",
+      id: map['id'] ?? "",
+      customId: map['customId'] ?? "",
     );
   }
 

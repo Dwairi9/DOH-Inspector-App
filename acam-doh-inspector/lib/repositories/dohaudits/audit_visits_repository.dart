@@ -3,6 +3,7 @@ import 'package:aca_mobile_app/data_models/checklist.dart';
 import 'package:aca_mobile_app/data_models/facility_information.dart';
 import 'package:aca_mobile_app/data_models/inspection.dart';
 import 'package:aca_mobile_app/data_models/inspection_with_config.dart';
+import 'package:aca_mobile_app/data_models/violation.dart';
 import 'package:aca_mobile_app/data_models/violation_information.dart';
 import 'package:aca_mobile_app/description/inspection_description.dart';
 import 'package:aca_mobile_app/description/report_description.dart';
@@ -15,6 +16,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../../data_models/professional_information.dart';
 import '../../data_models/violationCategory.dart';
+import '../../data_models/violation_clause.dart';
 
 enum AuditVisitInspectionDocumentDescription {
   completed("Insp Completed"),
@@ -150,7 +152,7 @@ class AuditVisitsRepository {
   }
 
 
-  //****** Submit Violation ****88
+  //****** Submit Violation ******
   static Future<ActionObject<dynamic>> getViolationCategoryList(String userId, String lang) async {
     var result =  await AccelaServiceManager.emseRequest('getViolationCategoryList', {"userId": userId, "lang": lang});
     return result;
@@ -174,9 +176,21 @@ class AuditVisitsRepository {
     return null;
   }
 
-  static Future<ActionObject> submitViolation(ViolationInformation? violationInfo, FacilityInformation? facilityInfo, ProfessionalInformation? professionalInfo) async {
+  static Future<Violation?> getViolation(String inspectionId) async{
+    var result = await AccelaServiceManager.emseRequest('getViolation', {"inspectionId": inspectionId});
+
+    if (result.success) {
+      return Violation.fromMap(result.content);
+    }
+    return null;
+  }
+
+  static Future<ActionObject> submitViolation(ViolationInformation? violationInfo, FacilityInformation? facilityInfo,
+      ProfessionalInformation? professionalInfo, List<ViolationClause> violationClauses) async {
     var result = await AccelaServiceManager.emseRequest('submitViolation',
         {
+          "violationCapId": violationInfo?.violationCapId,
+          "violationCustomId": violationInfo?.violationCustomId,
           "violationInformation": {
             "relatedAuditRequestNumber": violationInfo?.relatedAuditRequestNumber,
             "violationCategory": violationInfo?.category,
@@ -205,7 +219,8 @@ class AuditVisitsRepository {
             "professional": professionalInfo?.professionalProfession,
             "professionalLicenseIssueDate": professionalInfo?.professionalLicenseIssueDate,
             "professionalLicenseExpiryDate": professionalInfo?.professionalLicenseExpiryDate
-          }
+          },
+          "violations": violationClauses.map((x) => x.toMap()).toList()
         });
 
     if (result.success) {
@@ -214,4 +229,27 @@ class AuditVisitsRepository {
     return ActionObject(success: false, message: result.message);
   }
 
+  //********* Violation Clause
+  static Future<ActionObject<dynamic>> getViolationClauseModeList(String userId, String lang) async {
+    var result =  await AccelaServiceManager.emseRequest('getViolationModeList', {"userId": userId, "lang": lang});
+    return result;
+  }
+
+  static Future<ActionObject<dynamic>> getViolationClauseTypeList(String violationMode, String userId, String lang) async {
+    var result =  await AccelaServiceManager.emseRequest('getViolationTypeList', {"violationMode": violationMode, "userId": userId, "lang": lang});
+    return result;
+  }
+
+  static Future<ActionObject<dynamic>> getViolationItemDetails(String? violationCategory, String? violationMode, String? violationType, String? facilityNo, String? professionalNo) async {
+    var result =  await AccelaServiceManager.emseRequest('getViolationItem',
+        {
+          "violationMode": violationMode,
+          "violationType": violationType,
+          "facilityNo": facilityNo,
+          "proNo": professionalNo,
+          "violationCategory": violationCategory
+        });
+
+    return result;
+  }
 }

@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:aca_mobile_app/data_models/action_object.dart';
 import 'package:aca_mobile_app/data_models/attachment.dart';
 import 'package:aca_mobile_app/data_models/facility_information.dart';
 import 'package:aca_mobile_app/data_models/inspection.dart';
 import 'package:aca_mobile_app/data_models/inspection_with_config.dart';
+import 'package:aca_mobile_app/data_models/violation.dart';
+import 'package:aca_mobile_app/data_models/violation_clause.dart';
 import 'package:aca_mobile_app/description/inspection_result_group_item.dart';
 import 'package:aca_mobile_app/network/accela_services.dart';
 import 'package:aca_mobile_app/providers/error_message_provider.dart';
@@ -22,10 +25,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collection/collection.dart';
+import 'package:path/path.dart';
 
 import '../../data_models/professional_information.dart';
+import '../../data_models/record_id.dart';
 import '../../data_models/violationCategory.dart';
 import '../../data_models/violation_information.dart';
+import '../../repositories/record_repository.dart';
 
 //final auditVisitViewProvider = ChangeNotifierProvider((ref) => AuditVisitViewProvider());
 
@@ -61,10 +67,18 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
   AuditVisit? auditVisit;
 
   //*****Submit Violation Page******
-  bool isViolationExists = false;
-  bool isLoadingViolationExistingCall = false;
-  List<ViolationCategory>? violationCategories;
+  // bool isViolationExists = false;
+  // bool isLoadingViolationExistingCall = false;
+  RecordId? submittedViolationRecordId;
+  // Violation? existingViolation;
+
+  List<ViolationCategory> violationCategories = [];
+  List<ViolationCategory> violationClauseModes = [];
+  List<ViolationCategory> violationClauseTypes = [];
+
   String selectedViolationCategory = "";
+  // String selectedViolationClauseType = "";
+  // String selectedViolationClauseMode = "";
 
   String violationDate = "";
   ViolationInformation? violationInformation;
@@ -93,6 +107,20 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
   final TextEditingController professionalLicenseIssueDateController = TextEditingController();
   final TextEditingController professionalLicenseExpiryDateController = TextEditingController();
 
+  //Violation Clauses Controllers
+  List<ViolationClause> _violationClauses = [];
+  List<ViolationClause> get violationClauses => _violationClauses;
+
+  //Violation Attachments
+  bool isUploading = false;
+  bool isDeleting = false;
+  bool isReadOnly = false;
+  bool isDownloading = false;
+
+  List<Attachment> violationAttachments = [];
+  AttachmentObserver? attachmentObserver;
+  ActionObject downloadResult = ActionObject(success: false, message: "");
+
   @override
   List<Attachment> get getAttachments {
     return auditVisit?.attachments ?? [];
@@ -110,9 +138,11 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
 
   initProvider() async {
     await loadAuditVisit();
-    await loadViolationCategories();
+    // await loadViolationCategories();
+    // await loadViolationClauseModes();
+    // await loadViolationTypes();
 
-    getViolationData(customId);
+    // getViolationData(customId);
 
     notifyListeners();
   }
@@ -486,25 +516,69 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
   }
 
   ///Violation api calls
-  void getViolationData(String customId) async {
-    isLoadingViolationExistingCall = true;
-    notifyListeners();
-    var res = await AuditVisitsRepository.getViolationsExistsInformation(customId);
-    log('i am printing response ' + res.toString());
-    isLoadingViolationExistingCall = false;
-    if (res.success) {
-      isViolationExists = true;
+
+  //Submit Violation Page
+  Future<Violation?> initViolationPage(String licenseNumber) async{
+    setLoading(true);
+    await loadViolationCategories();
+    await loadViolationClauseModes();
+
+    var violation = await AuditVisitsRepository.getViolation(customId);
+    if(violation != null){
+      submittedViolationRecordId = RecordId(id: violation.violationCapId ?? "", customId: violation.violationCustomId ?? "");
+      violationInformation = violation.violationInformation;
+      violationInformation?.violationCustomId = violation.violationCustomId;
+      violationInformation?.violationCapId = violation.violationCapId;
+
+      selectedViolationCategory = violationInformation?.category ?? "";
+
+      if(violation.professionalInformation != null){
+        professionalLicenseNumberController.text = licenseNumber;
+        professionalNameInEnglishController.text = violation.professionalInformation?.professionalNameInEnglish ?? "";
+        professionalNameInArabicController.text = violation.professionalInformation?.professionalNameInArabic ?? "";
+        professionalCategoryController.text = violation.professionalInformation?.professionalCategory ?? "";
+        professionalMajorController.text = violation.professionalInformation?.professionalMajor ?? "";
+        professionalProfessionController.text = violation.professionalInformation?.professionalProfession ?? "";
+        professionalLicenseIssueDateController.text = violation.professionalInformation?.professionalLicenseIssueDate ?? "";
+        professionalLicenseExpiryDateController.text = violation.professionalInformation?.professionalLicenseExpiryDate ?? "";
+        professionalInformation = violation.professionalInformation;
+      }
+
+      if(violation.facilityInformation != null){
+        facilityLicenseNumberController.text = violation.facilityInformation?.facilityLicenseNumber ?? "";
+        facilityNameInEnglishController.text = violation.facilityInformation?.facilityNameInEnglish ?? "";
+        facilityNameInArabicController.text = violation.facilityInformation?.facilityNameInArabic ?? "";
+        facilityCategoryController.text = violation.facilityInformation?.facilityCategory ?? "";
+        facilityTypeController.text = violation.facilityInformation?.facilityType ?? "";
+        facilitySubTypeController.text = violation.facilityInformation?.facilitySubType ?? "";
+        facilityLicenseIssueDateController.text = violation.facilityInformation?.facilityLicenseIssueDate ?? "";
+        facilityLicenseExpiryDateController.text = violation.facilityInformation?.facilityLicenseExpiryDate ?? "";
+        facilityRegionController.text = violation.facilityInformation?.facilityRegion ?? "";
+        facilityCityController.text = violation.facilityInformation?.facilityCity ?? "";
+
+        facilityInformation = violation.facilityInformation;
+      }
+
+      if(violation.violationClauses.isNotEmpty){
+        _violationClauses = violation.violationClauses;
+
+        for(var i =0 ; i < _violationClauses.length ; i++){
+          _violationClauses[i].availableTypes = await getViolationClauseTypesFromMode( _violationClauses[i].violationMode ?? "");
+          _violationClauses[i].violationRemarksController.text = _violationClauses[i].violationRemarks;
+        }
+      }
+
+      await loadAttachments();
     }
-    notifyListeners();
+
+    setLoading(false);
+    return violation;
   }
 
-  // void getViolationCategoryList() async {
-  //
-  // }
   loadViolationCategories() async {
     String userId = ref?.read(userSessionProvider).userId ?? "";
-    setLoading(true);
     setCriticalErrorMessage("");
+
     var res = await AuditVisitsRepository.getViolationCategoryList(userId, 'en');
     log('response of ViolationCategories' + res.toString());
 
@@ -516,14 +590,22 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
 
     var resultList = res.content.map((x) => ViolationCategory.fromMap(x));
     violationCategories = List<ViolationCategory>.from(resultList);
-
-    setLoading(false);
   }
 
-  //Submit Violation Page
+  loadViolationClauseModes() async {
+    String userId = ref?.read(userSessionProvider).userId ?? "";
+    setCriticalErrorMessage("");
+    var res = await AuditVisitsRepository.getViolationClauseModeList(userId, 'en');
+    log('response of getViolationModeList' + res.toString());
 
-  List<ViolationCategory> getViolationCategoryList() {
-    return violationCategories ?? [];
+    if (!res.success) {
+      setCriticalErrorMessage(res.message);
+      setLoading(false);
+      return;
+    }
+
+    var resultList = res.content.map((x) => ViolationCategory.fromMap(x));
+    violationClauseModes = List<ViolationCategory>.from(resultList);
   }
 
   Future<FacilityInformation?> getViolationFacilityInfo() async{
@@ -550,28 +632,8 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
   void setViolationCategory(String value) async{
     selectedViolationCategory = value;
 
-    facilityInformation = null;
-    facilityLicenseNumberController.text = "";
-    facilityNameInEnglishController.text = "";
-    facilityNameInArabicController.text = "";
-    facilityCategoryController.text = "";
-    facilityTypeController.text = "";
-    facilitySubTypeController.text = "";
-    facilityLicenseIssueDateController.text = "";
-    facilityLicenseExpiryDateController.text = "";
-    facilityRegionController.text = "";
-    facilityCityController.text = "";
-
-    professionalInformation = null;
-    professionalNameInEnglishController.text = "";
-    professionalLicenseNumberController.text = "";
-    professionalNameInArabicController.text = "";
-    professionalCategoryController.text = "";
-    professionalMajorController.text = "";
-    professionalProfessionController.text = "";
-    professionalLicenseIssueDateController.text = "";
-    professionalLicenseExpiryDateController.text = "";
-
+    clearFacilityInformation();
+    clearProfessionalInformation();
     notifyListeners();
 
     if(value == "Facility") {
@@ -606,18 +668,7 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
   }
 
   void setProfessionalInfo(String licenseNumber) async{
-    professionalInformation = null;
-    professionalLicenseNumberController.text = "";
-    professionalNameInEnglishController.text = "";
-    professionalNameInArabicController.text = "";
-    professionalCategoryController.text = "";
-    professionalMajorController.text = "";
-    professionalProfessionController.text = "";
-    professionalLicenseIssueDateController.text = "";
-    professionalLicenseExpiryDateController.text = "";
-
-    notifyListeners();
-
+    clearProfessionalInformation();
     setLoading(true);
 
     var professionalInfo = await getViolationProfessionalInfo(licenseNumber);
@@ -645,31 +696,242 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
 
   Future<ActionObject> submitViolation() async {
     setLoading(true);
+    try{
+      if (isSaving) {
+        return ActionObject(success: false, message: "");
+      }
 
-    if (isSaving) {
-      return ActionObject(success: false, message: "");
-    }
+      clearErrorMessage();
+      setSaving(true);
 
-    clearErrorMessage();
-    setSaving(true);
+      if (selectedViolationCategory.isEmpty) {
+        setSaving(false);
+        setLoading(false);
+        return ActionObject(success: false, message: "Please Select a Violation Category".tr());
+      }
 
-    if (selectedViolationCategory.isEmpty) {
+      if (selectedViolationCategory == 'Professional' && professionalLicenseNumberController.text.isEmpty) {
+        setSaving(false);
+        setLoading(false);
+        return ActionObject(success: false, message: "Please Enter a Professional License Number".tr());
+      }
+
+      if (_violationClauses.isEmpty) {
+        setSaving(false);
+        setLoading(false);
+
+        return ActionObject(success: false, message: "Please Enter at least one violation clause".tr());
+      }
+
+      for(var i =0 ; i < _violationClauses.length ; i++){
+        _violationClauses[i].violationRemarks = _violationClauses[i].violationRemarksController.text;
+      }
+
+      violationInformation = ViolationInformation(relatedAuditRequestNumber: customId, category: selectedViolationCategory, violationDate: violationDate, violationCapId: violationInformation?.violationCapId, violationCustomId: violationInformation?.violationCustomId);
+      var result = await AuditVisitsRepository.submitViolation(violationInformation, facilityInformation, professionalInformation, _violationClauses);
+
       setSaving(false);
-      return ActionObject(success: false, message: "Please Select a Violation Category".tr());
+      setLoading(false);
+
+      if(result.success){
+        submittedViolationRecordId = RecordId.fromMap(result.content);
+      }
+
+      return result;
+    }
+    catch(error){
+      setLoading(false);
+      return ActionObject(success: false, message: "Something went wrong, try again later!".tr());
+    }
+  }
+
+  // ******* Violation Clauses
+  void addViolationClause(){
+    _violationClauses.add(ViolationClause());
+    notifyListeners();
+  }
+
+  void deleteSelectedViolationClause(){
+    _violationClauses.removeWhere((c)=> c.isSelected);
+    notifyListeners();
+  }
+
+  void updateViolationClauseMode(int index, String mode) async{
+    _violationClauses[index].violationMode = mode;
+    _violationClauses[index].availableTypes = await getViolationClauseTypesFromMode(mode);
+    _violationClauses[index].violationType = null;
+    _violationClauses[index].violationReference = "";
+    _violationClauses[index].violationAmount = "";
+    _violationClauses[index].violationOccurrence = "";
+    _violationClauses[index].violationFollowUp = "";
+
+    notifyListeners();
+  }
+
+  void updateViolationClauseType(int index, String type) async{
+    setLoading(true);
+    try{
+      _violationClauses[index].violationType = type;
+      var violationItemDetailsResult = await AuditVisitsRepository.getViolationItemDetails(selectedViolationCategory, _violationClauses[index].violationMode, type, facilityInformation?.facilityLicenseNumber ?? "", professionalInformation?.professionalLicenseNumber ?? "");
+      if (!violationItemDetailsResult.success) {
+        setCriticalErrorMessage(violationItemDetailsResult.message);
+        setLoading(false);
+        return;
+      }
+
+      var violationItemDetails = violationItemDetailsResult.content;
+      _violationClauses[index].violationReference = double.tryParse(violationItemDetails["violationReference"]?.toString() ?? '')?.toInt().toString() ?? '0';
+      _violationClauses[index].violationAmount = violationItemDetails["violationAmount"];
+      _violationClauses[index].violationOccurrence = (violationItemDetails["occurrence"] ?? 0.0 as double?)?.toInt().toString() ?? '0';
+      _violationClauses[index].violationFollowUp = double.tryParse(violationItemDetails["followUpDays"]?.toString() ?? '')?.toInt().toString() ?? '0';
+      _violationClauses[index].violationAction = violationItemDetails["action"];
+
+      setLoading(false);
+      notifyListeners();
+    }
+    catch(error){
+      setLoading(false);
     }
 
-    if (selectedViolationCategory == 'Professional' && professionalLicenseNumberController.text.isEmpty) {
-      setSaving(false);
-      return ActionObject(success: false, message: "Please Enter a Professional License Number".tr());
+  }
+
+  void toggleSelect(int index, bool value){
+    _violationClauses[index].isSelected = value;
+    notifyListeners();
+  }
+
+  void selectAll(bool value){
+    for(var clause in _violationClauses){
+      clause.isSelected = value;
     }
 
-    violationInformation = ViolationInformation(relatedAuditRequestNumber: customId, category: selectedViolationCategory, violationDate: violationDate);
-    var result = await AuditVisitsRepository.submitViolation(violationInformation, facilityInformation, professionalInformation);
+    notifyListeners();
+  }
 
-    setSaving(false);
+  Future<List<ViolationCategory>> getViolationClauseTypesFromMode(String mode) async{
+    String userId = ref?.read(userSessionProvider).userId ?? "";
+    setLoading(true);
+    setCriticalErrorMessage("");
+
+    var res = await AuditVisitsRepository.getViolationClauseTypeList(mode, userId, 'en');
+
+    if (!res.success) {
+      setCriticalErrorMessage(res.message);
+      setLoading(false);
+      return [];
+    }
+
+    var resultList = res.content.map((x) => ViolationCategory.fromMap(x));
+    var violationTypes = List<ViolationCategory>.from(resultList);
+
     setLoading(false);
+    return violationTypes;
+  }
 
-    return result;
+  //Violation Attachments
+  Future<ActionObject> uploadAttachment(File file) async {
+    var actionObject = ActionObject(success: false, message: "Not implemented");
+    setUploading(true);
+    setUploadProgress(0.0);
+
+    actionObject = await AttachmentRepository.uploadEntityDocument(DocumentEntityType.record, file, recordId: submittedViolationRecordId?.id ?? "",
+        sendProgress: (int sent, int total) {
+          setUploadProgress(sent / total);
+        }, group: "HAVR", category: "Supporting Document");
+
+    setUploading(false);
+    return actionObject;
+  }
+  bool isPreventOperations() {
+    return isLoading || isDeleting || isUploading;
+  }
+
+  Future<ActionObject> deleteAttachment(String documentNo) async {
+    var actionObject = ActionObject(success: false, message: "Not implemented");
+    setDeleting(true);
+    actionObject = await AttachmentRepository.deleteEntityDocument(DocumentEntityType.record, documentNo, recordId: submittedViolationRecordId?.id ?? "");
+
+    setDeleting(false);
+    return actionObject;
+  }
+
+  Future<ActionObject> downloadAttachment(String documentNo, String fileName) async {
+    setDownloading(true);
+    downloadResult = await AttachmentRepository.downloadDocument(documentNo, fileName, false);
+
+    setDownloading(false);
+    return downloadResult;
+  }
+
+  loadAttachments() async {
+    setLoading(true);
+    violationAttachments = await RecordRepository.getRecordDocuments(submittedViolationRecordId!);
+    attachmentObserver?.setAttachments = violationAttachments;
+
+    setLoading(false);
+  }
+
+  setUploading(isUploading) {
+    this.isUploading = isUploading;
+    notifyListeners();
+  }
+
+  setDeleting(isDeleting) {
+    this.isDeleting = isDeleting;
+    notifyListeners();
+  }
+
+  setDownloading(isDownloading) {
+    this.isDownloading = isDownloading;
+    notifyListeners();
+  }
+
+  void clearViolation(){
+    clearViolationInformation();
+    clearFacilityInformation();
+    clearProfessionalInformation();
+    clearViolationClauses();
+    clearErrorMessage();
+  }
+
+  void clearViolationInformation(){
+    violationInformation = ViolationInformation(category: "", relatedAuditRequestNumber: "", violationDate: "", violationCapId: "", violationCustomId: "");
+    selectedViolationCategory = "";
+  }
+
+  void clearFacilityInformation(){
+    facilityInformation = FacilityInformation(facilityLicenseNumber: "", facilityNameInEnglish: "", facilityNameInArabic: "", facilityCategory: "",
+        facilityType: "", facilitySubType: "", facilityLicenseIssueDate: "", facilityLicenseExpiryDate: "", facilityRegion: "", facilityCity: "");
+
+    facilityLicenseNumberController.text = "";
+    facilityNameInEnglishController.text = "";
+    facilityNameInArabicController.text = "";
+    facilityCategoryController.text = "";
+    facilityTypeController.text = "";
+    facilitySubTypeController.text = "";
+    facilityLicenseIssueDateController.text = "";
+    facilityLicenseExpiryDateController.text = "";
+    facilityRegionController.text = "";
+    facilityCityController.text = "";
+  }
+
+  void clearProfessionalInformation(){
+    professionalInformation = ProfessionalInformation(professionalLicenseNumber: "", professionalNameInEnglish: "", professionalNameInArabic: "",
+        professionalCategory: "", professionalMajor: "", professionalProfession: "", professionalLicenseIssueDate: "", professionalLicenseExpiryDate: "");
+
+    professionalNameInEnglishController.text = "";
+    professionalLicenseNumberController.text = "";
+    professionalNameInArabicController.text = "";
+    professionalCategoryController.text = "";
+    professionalMajorController.text = "";
+    professionalProfessionController.text = "";
+    professionalLicenseIssueDateController.text = "";
+    professionalLicenseExpiryDateController.text = "";
+  }
+
+  void clearViolationClauses(){
+    selectAll(true);
+    deleteSelectedViolationClause();
   }
 
   @override
