@@ -1,0 +1,2 @@
+C:/Work/Accela/DOH-Inspector-App/DOH-Inspector-App/acam-doh-inspector/android/app/.cxx/Debug/3ra6m1u4/x86_64/CMakeFiles/edit_cache.dir
+C:/Work/Accela/DOH-Inspector-App/DOH-Inspector-App/acam-doh-inspector/android/app/.cxx/Debug/3ra6m1u4/x86_64/CMakeFiles/rebuild_cache.dir
