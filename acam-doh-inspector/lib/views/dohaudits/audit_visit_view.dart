@@ -273,10 +273,18 @@ class AuditVisitView extends ConsumerWidget {
   }
 
   showViolation(BuildContext context, AuditVisit auditVisit, AuditVisitViewProvider provider, WidgetRef ref) {
-    WidgetUtil.showFullScreenDialog(context, AuditVisitViolationView(
-      auditVisit,auditVisitViewProvider: auditVisitViewProvider,),
-        "Violation".tr(), subtitle: auditVisit.customId, [
-      if (auditVisit.editable)
+    provider.violationHeaderCustomId = auditVisit.customId;
+
+    WidgetUtil.showFullScreenDialog(context, AuditVisitViolationView( auditVisit,auditVisitViewProvider: auditVisitViewProvider,),
+        "Violation".tr(), subtitleBuilder: (context){
+          return Consumer(
+              builder: (context, ref, child){
+                final violationProvider = ref.watch(auditVisitViewProvider);
+                final currentValue = "${violationProvider.violationHeaderCustomId} - ${violationProvider.violationHeaderStatus}";
+                return Text(currentValue);
+              });
+        }, [
+      if (auditVisit.editable && provider.isViolationEditable)
         FullScreenActionButton(
             title: "Submit".tr(),
             callback: provider.isSaving ? null :
@@ -286,7 +294,6 @@ class AuditVisitView extends ConsumerWidget {
                  }
 
                  var actionObject = await provider.submitViolation();
-
                  if (actionObject.success) {
                    if (fullScreenContext.mounted) AcamUtility.showMessageForActionObject(fullScreenContext, actionObject);
 
@@ -294,9 +301,9 @@ class AuditVisitView extends ConsumerWidget {
                    // ref.read(currentAuditVisitListProvider).loadInspections();
                    // ref.read(previousAuditVisitListProvider).loadInspections();
 
-                    if (fullScreenContext.mounted) {
-                      showViolationAttachments(context, ref);
-                    }
+                    // if (fullScreenContext.mounted) {
+                    //   showViolationAttachments(context, ref);
+                    // }
                  }
                  else {
                   provider.setErrorMessage(actionObject.message);

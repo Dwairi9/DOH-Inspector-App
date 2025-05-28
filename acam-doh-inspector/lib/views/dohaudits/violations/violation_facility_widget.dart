@@ -49,17 +49,17 @@ class ViolationFacilityWidget extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ViolationTitleSubtitleView(title: type, subTitle: 'Facility Type', enabled: false,),
-                    const SizedBox(height: 10,),
                     ViolationTitleSubtitleView(title: category, subTitle: 'Facility Category', enabled: false,),
+                    const SizedBox(height: 10,),
+                    ViolationTitleSubtitleView(title: subType, subTitle: 'Facility Sub Type', enabled: false,),
                   ],
                 )),
-            SizedBox(width: 10,),
+            const SizedBox(width: 10),
             Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ViolationTitleSubtitleView(title: subType, subTitle: 'Facility Sub Type', enabled: false,),
+                    ViolationTitleSubtitleView(title: type, subTitle: 'Facility Type', enabled: false,),
                   ],
                 )),
           ],),
@@ -73,9 +73,28 @@ class ViolationFacilityWidget extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ViolationTitleSubtitleView(title: licenseIssueDate, subTitle: 'Facility License Expiry Date', width: 0.9, enabled: false),
+              ViolationTitleSubtitleView(title: licenseExpiryDate, subTitle: 'Facility License Expiry Date', width: 0.9, enabled: false),
             ],),
           const SizedBox(height: 10,),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ViolationTitleSubtitleView(title: region, subTitle: 'Region', enabled: false,),
+                  ],
+                )),
+            SizedBox(width: 10,),
+            Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ViolationTitleSubtitleView(title: city, subTitle: 'City', enabled: false,),
+                  ],
+                )),
+          ],),
           const SizedBox(height: 10,),
       ],
     );

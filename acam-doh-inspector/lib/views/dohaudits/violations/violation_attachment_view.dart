@@ -93,7 +93,7 @@ class ViolationAttachmentView extends ConsumerWidget {
             ],
           ),
         ),
-        if (!provider.isReadOnly)
+        if(provider.isViolationEditable)
           Padding(
             padding: const EdgeInsets.fromLTRB(24.0, 8, 24, 8),
             child: SizedBox(
@@ -119,22 +119,6 @@ class ViolationAttachmentView extends ConsumerWidget {
                         }
                       }
                     } catch (ex) {}
-                    //   try {
-                    //     FilePickerResult? result = (await FilePicker.platform.pickFiles(
-                    //       type: FileType.media,
-                    //       allowMultiple: false,
-                    //       //   allowedExtensions: sessionProvider.allowedFileTypes,
-                    //     ));
-                    //     if (result != null) {
-                    //       var path = result.files.single.path;
-                    //       var file = File(path!);
-                    //       var res = await provider.uploadAttachment(file);
-                    //       if (context.mounted) AcamUtility.showMessageForActionObject(context, res);
-                    //       if (res.success) {
-                    //         provider.loadAttachments();
-                    //       }
-                    //     }
-                    //   } catch (ex) {}
                   },
                   child: Text("Add Attachment".tr()),
                 )),
@@ -310,7 +294,7 @@ class AttachmentItemWidget extends ConsumerWidget {
                           // Utility.downloadFile(attachments[index].documentNo, attachments[index].fileName, context);
                         },
                       ),
-                    if (!provider.isReadOnly)
+                    if(provider.isViolationEditable)
                       AcamIcon(
                         icon: Icons.delete_outline,
                         text: "Delete".tr(),

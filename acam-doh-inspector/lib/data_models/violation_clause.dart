@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 
 class ViolationClause{
   bool isSelected;
-  String? violationMode;
-  String? violationType;
+  String violationMode;
+  String violationModeError;
+  String violationType;
+  String violationTypeError;
   List<ViolationCategory> availableTypes;
 
   String violationReference = "";
@@ -18,8 +20,10 @@ class ViolationClause{
 
   ViolationClause({
     this.isSelected = false,
-    this.violationMode,
-    this.violationType,
+    this.violationMode = "",
+    this.violationModeError = "",
+    this.violationType = "",
+    this.violationTypeError = "",
     this.availableTypes = const [],
     this.violationReference = "",
     this.violationAmount = "",

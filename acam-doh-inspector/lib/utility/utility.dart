@@ -52,6 +52,17 @@ class Utility {
     }
   }
 
+  static String reformatDate(String inputDate, String currentFormat, String newFormat) {
+    try {
+      DateTime parsedDate = DateFormat(currentFormat).parse(inputDate);
+      String formattedDate = DateFormat(newFormat).format(parsedDate);
+
+      return formattedDate;
+    } catch (e) {
+      return "";
+    }
+  }
+
   static TimeOfDay? stringToTime(String time) {
     try {
       var arr = time.split(":");

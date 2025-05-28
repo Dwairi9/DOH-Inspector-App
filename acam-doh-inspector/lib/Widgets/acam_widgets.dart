@@ -65,7 +65,9 @@ class FullScreenDialog extends ConsumerWidget {
   final String? subtitle;
   final void Function(BuildContext context)? onClose;
   final loadingProvider = StateProvider<bool>((_) => false);
-  FullScreenDialog({super.key, required this.content, required this.title, required this.actions, this.onClose, this.subtitle});
+  final WidgetBuilder? subtitleBuilder;
+
+  FullScreenDialog({super.key, required this.content, required this.title, required this.actions, this.onClose, this.subtitle, this.subtitleBuilder});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -76,7 +78,9 @@ class FullScreenDialog extends ConsumerWidget {
           child: Column(
             children: [
               AutoSizeText(title, maxLines: 1, minFontSize: 10, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 24)),
-              if (subtitle != null)
+              if (subtitleBuilder != null)
+                subtitleBuilder!(context)
+              else if (subtitle != null)
                 AutoSizeText(subtitle!,
                     maxLines: 1, minFontSize: 10, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 16)),
             ],
@@ -126,13 +130,15 @@ class FullScreenActionButton {
 
 class WidgetUtil {
   static Future<T?> showFullScreenDialog<T extends Object?>(BuildContext context, Widget content, String title, List<FullScreenActionButton> actions,
-      {void Function(BuildContext context)? onClose, String? subtitle}) async {
+      {void Function(BuildContext context)? onClose, String? subtitle, WidgetBuilder? subtitleBuilder}) async {
     return Navigator.push<T>(
         context,
         PageTransition(
             type: PageTransitionType.bottomToTop,
             duration: const Duration(milliseconds: 200),
-            child: FullScreenDialog(content: content, title: title, actions: actions, onClose: onClose, subtitle: subtitle)));
+            child: FullScreenDialog(
+                content: content, title: title, actions: actions, onClose: onClose,
+                subtitle: subtitle, subtitleBuilder: subtitleBuilder)));
   }
 
   static Future<T?> editAccelaUnifiedForm<T extends Object?>(BuildContext context, AccelaUnifiedFormProvider provider,

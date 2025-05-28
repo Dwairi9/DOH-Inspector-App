@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -25,13 +24,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collection/collection.dart';
-import 'package:path/path.dart';
 
 import '../../data_models/professional_information.dart';
 import '../../data_models/record_id.dart';
 import '../../data_models/violationCategory.dart';
 import '../../data_models/violation_information.dart';
 import '../../repositories/record_repository.dart';
+import '../../utility/utility.dart';
 
 //final auditVisitViewProvider = ChangeNotifierProvider((ref) => AuditVisitViewProvider());
 
@@ -67,9 +66,13 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
   AuditVisit? auditVisit;
 
   //*****Submit Violation Page******
+
   // bool isViolationExists = false;
   // bool isLoadingViolationExistingCall = false;
+  bool isViolationEditable = true;
   RecordId? submittedViolationRecordId;
+  String violationHeaderCustomId = "";
+  String violationHeaderStatus = "";
   // Violation? existingViolation;
 
   List<ViolationCategory> violationCategories = [];
@@ -519,60 +522,74 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
 
   //Submit Violation Page
   Future<Violation?> initViolationPage(String licenseNumber) async{
-    setLoading(true);
-    await loadViolationCategories();
-    await loadViolationClauseModes();
+    try {
+      setLoading(true);
+      await loadViolationCategories();
+      await loadViolationClauseModes();
 
-    var violation = await AuditVisitsRepository.getViolation(customId);
-    if(violation != null){
-      submittedViolationRecordId = RecordId(id: violation.violationCapId ?? "", customId: violation.violationCustomId ?? "");
-      violationInformation = violation.violationInformation;
-      violationInformation?.violationCustomId = violation.violationCustomId;
-      violationInformation?.violationCapId = violation.violationCapId;
+      var violation = await AuditVisitsRepository.getViolation(customId);
+      if(violation != null){
+        submittedViolationRecordId = RecordId(id: violation.violationCapId ?? "", customId: violation.violationCustomId ?? "");
+        violationHeaderCustomId = violation.violationCustomId ?? "";
+        violationHeaderStatus = violation.violationStatus ?? "";
 
-      selectedViolationCategory = violationInformation?.category ?? "";
-
-      if(violation.professionalInformation != null){
-        professionalLicenseNumberController.text = licenseNumber;
-        professionalNameInEnglishController.text = violation.professionalInformation?.professionalNameInEnglish ?? "";
-        professionalNameInArabicController.text = violation.professionalInformation?.professionalNameInArabic ?? "";
-        professionalCategoryController.text = violation.professionalInformation?.professionalCategory ?? "";
-        professionalMajorController.text = violation.professionalInformation?.professionalMajor ?? "";
-        professionalProfessionController.text = violation.professionalInformation?.professionalProfession ?? "";
-        professionalLicenseIssueDateController.text = violation.professionalInformation?.professionalLicenseIssueDate ?? "";
-        professionalLicenseExpiryDateController.text = violation.professionalInformation?.professionalLicenseExpiryDate ?? "";
-        professionalInformation = violation.professionalInformation;
-      }
-
-      if(violation.facilityInformation != null){
-        facilityLicenseNumberController.text = violation.facilityInformation?.facilityLicenseNumber ?? "";
-        facilityNameInEnglishController.text = violation.facilityInformation?.facilityNameInEnglish ?? "";
-        facilityNameInArabicController.text = violation.facilityInformation?.facilityNameInArabic ?? "";
-        facilityCategoryController.text = violation.facilityInformation?.facilityCategory ?? "";
-        facilityTypeController.text = violation.facilityInformation?.facilityType ?? "";
-        facilitySubTypeController.text = violation.facilityInformation?.facilitySubType ?? "";
-        facilityLicenseIssueDateController.text = violation.facilityInformation?.facilityLicenseIssueDate ?? "";
-        facilityLicenseExpiryDateController.text = violation.facilityInformation?.facilityLicenseExpiryDate ?? "";
-        facilityRegionController.text = violation.facilityInformation?.facilityRegion ?? "";
-        facilityCityController.text = violation.facilityInformation?.facilityCity ?? "";
-
-        facilityInformation = violation.facilityInformation;
-      }
-
-      if(violation.violationClauses.isNotEmpty){
-        _violationClauses = violation.violationClauses;
-
-        for(var i =0 ; i < _violationClauses.length ; i++){
-          _violationClauses[i].availableTypes = await getViolationClauseTypesFromMode( _violationClauses[i].violationMode ?? "");
-          _violationClauses[i].violationRemarksController.text = _violationClauses[i].violationRemarks;
+        if(violation.violationStatus != "Submitted"){
+          isViolationEditable = false;
         }
+
+        violationInformation = violation.violationInformation;
+        violationInformation?.violationCustomId = violation.violationCustomId;
+        violationInformation?.violationCapId = violation.violationCapId;
+        selectedViolationCategory = violationInformation?.category ?? "";
+
+        if(violation.professionalInformation != null){
+          professionalLicenseNumberController.text = licenseNumber;
+          professionalNameInEnglishController.text = violation.professionalInformation?.professionalNameInEnglish ?? "";
+          professionalNameInArabicController.text = violation.professionalInformation?.professionalNameInArabic ?? "";
+          professionalCategoryController.text = violation.professionalInformation?.professionalCategory ?? "";
+          professionalMajorController.text = violation.professionalInformation?.professionalMajor ?? "";
+          professionalProfessionController.text = violation.professionalInformation?.professionalProfession ?? "";
+          professionalLicenseIssueDateController.text = Utility.reformatDate(violation.professionalInformation?.professionalLicenseIssueDate ?? "", "MM/dd/yyyy", "dd/MM/yyyy");
+          professionalLicenseExpiryDateController.text = Utility.reformatDate(violation.professionalInformation?.professionalLicenseExpiryDate ?? "", "MM/dd/yyyy", "dd/MM/yyyy");
+          professionalInformation = violation.professionalInformation;
+        }
+
+        if(violation.facilityInformation != null){
+          facilityLicenseNumberController.text = violation.facilityInformation?.facilityLicenseNumber ?? "";
+          facilityNameInEnglishController.text = violation.facilityInformation?.facilityNameInEnglish ?? "";
+          facilityNameInArabicController.text = violation.facilityInformation?.facilityNameInArabic ?? "";
+          facilityCategoryController.text = violation.facilityInformation?.facilityCategory ?? "";
+          facilityTypeController.text = violation.facilityInformation?.facilityType ?? "";
+          facilitySubTypeController.text = violation.facilityInformation?.facilitySubType ?? "";
+          facilityLicenseIssueDateController.text = Utility.reformatDate(violation.facilityInformation?.facilityLicenseIssueDate ?? "", "MM/dd/yyyy", "dd/MM/yyyy");
+          facilityLicenseExpiryDateController.text = Utility.reformatDate(violation.facilityInformation?.facilityLicenseExpiryDate ?? "", "MM/dd/yyyy", "dd/MM/yyyy");
+          facilityRegionController.text = violation.facilityInformation?.facilityRegion ?? "";
+          facilityCityController.text = violation.facilityInformation?.facilityCity ?? "";
+
+          facilityInformation = violation.facilityInformation;
+        }
+
+        if(violation.violationClauses.isNotEmpty){
+          _violationClauses = violation.violationClauses;
+
+          for(var i =0 ; i < _violationClauses.length ; i++){
+            _violationClauses[i].availableTypes = await getViolationClauseTypesFromMode( _violationClauses[i].violationMode);
+            _violationClauses[i].violationRemarksController.text = _violationClauses[i].violationRemarks;
+            _violationClauses[i].violationAction = _violationClauses[i].violationAction == "" || _violationClauses[i].violationAction == "null" ? "" : _violationClauses[i].violationAction;
+            _violationClauses[i].violationRemarks = _violationClauses[i].violationRemarks == "" || _violationClauses[i].violationRemarks == "null" ? "" : _violationClauses[i].violationRemarks;
+          }
+        }
+
+        await loadAttachments();
       }
 
-      await loadAttachments();
+      setLoading(false);
+      return violation;
+    } catch (e) {
+      return null;
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
-    return violation;
   }
 
   loadViolationCategories() async {
@@ -623,7 +640,7 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
     setLoading(true);
     setCriticalErrorMessage("");
 
-    var professionalInfo = await AuditVisitsRepository.getViolationProfessionalInfo(licenseNumber);
+    var professionalInfo = await AuditVisitsRepository.getViolationProfessionalInfo(customId, licenseNumber);
     setLoading(false);
 
     return professionalInfo;
@@ -667,31 +684,43 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
     }
   }
 
-  void setProfessionalInfo(String licenseNumber) async{
+  Future<ActionObject> setProfessionalInfo(String licenseNumber) async{
     clearProfessionalInformation();
     setLoading(true);
 
-    var professionalInfo = await getViolationProfessionalInfo(licenseNumber);
-    if (professionalInfo == null) {
-      setCriticalErrorMessage("Could not get professional information");
-      setLoading(false);
-      return;
-    }
-    professionalLicenseNumberController.text = licenseNumber;
-    professionalNameInEnglishController.text = professionalInfo.professionalNameInEnglish;
-    professionalNameInArabicController.text = professionalInfo.professionalNameInArabic;
-    professionalCategoryController.text = professionalInfo.professionalCategory;
-    professionalMajorController.text = professionalInfo.professionalMajor;
-    professionalProfessionController.text = professionalInfo.professionalProfession;
-    professionalLicenseIssueDateController.text = professionalInfo.professionalLicenseIssueDate;
-    professionalLicenseExpiryDateController.text = professionalInfo.professionalLicenseExpiryDate;
-    professionalInformation = ProfessionalInformation(professionalLicenseNumber: licenseNumber, professionalNameInEnglish: professionalInfo.professionalNameInEnglish,
-        professionalNameInArabic: professionalInfo.professionalNameInArabic, professionalCategory: professionalInfo.professionalCategory,
-        professionalMajor: professionalInfo.professionalMajor, professionalProfession: professionalInfo.professionalProfession,
-        professionalLicenseIssueDate: professionalInfo.professionalLicenseIssueDate, professionalLicenseExpiryDate: professionalInfo.professionalLicenseExpiryDate);
+    try{
+      var professionalInfo = await getViolationProfessionalInfo(licenseNumber);
+      if (professionalInfo == null) {
+        setCriticalErrorMessage("");
+        setLoading(false);
+        return ActionObject(success: false, message: "Invalid Professional License Number".tr());
+      }
+      else if(professionalInfo.errorMessage.isNotEmpty){
+        setCriticalErrorMessage("");
+        setLoading(false);
+        return ActionObject(success: false, message: professionalInfo.errorMessage);
+      }
 
-    setLoading(false);
-    notifyListeners();
+      professionalLicenseNumberController.text = licenseNumber;
+      professionalNameInEnglishController.text = professionalInfo.professionalNameInEnglish;
+      professionalNameInArabicController.text = professionalInfo.professionalNameInArabic;
+      professionalCategoryController.text = professionalInfo.professionalCategory;
+      professionalMajorController.text = professionalInfo.professionalMajor;
+      professionalProfessionController.text = professionalInfo.professionalProfession;
+      professionalLicenseIssueDateController.text = professionalInfo.professionalLicenseIssueDate;
+      professionalLicenseExpiryDateController.text = professionalInfo.professionalLicenseExpiryDate;
+      professionalInformation = ProfessionalInformation(professionalLicenseNumber: licenseNumber, professionalNameInEnglish: professionalInfo.professionalNameInEnglish,
+          professionalNameInArabic: professionalInfo.professionalNameInArabic, professionalCategory: professionalInfo.professionalCategory,
+          professionalMajor: professionalInfo.professionalMajor, professionalProfession: professionalInfo.professionalProfession,
+          professionalLicenseIssueDate: professionalInfo.professionalLicenseIssueDate, professionalLicenseExpiryDate: professionalInfo.professionalLicenseExpiryDate, errorMessage: professionalInfo.errorMessage);
+
+      return ActionObject(success: true, message: "");
+    }catch(error){
+      return ActionObject(success: false, message: "Invalid Professional License Number".tr());
+    } finally{
+      setLoading(false);
+      notifyListeners();
+    }
   }
 
   Future<ActionObject> submitViolation() async {
@@ -730,13 +759,15 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
       violationInformation = ViolationInformation(relatedAuditRequestNumber: customId, category: selectedViolationCategory, violationDate: violationDate, violationCapId: violationInformation?.violationCapId, violationCustomId: violationInformation?.violationCustomId);
       var result = await AuditVisitsRepository.submitViolation(violationInformation, facilityInformation, professionalInformation, _violationClauses);
 
-      setSaving(false);
-      setLoading(false);
-
       if(result.success){
         submittedViolationRecordId = RecordId.fromMap(result.content);
+
+        violationHeaderCustomId = submittedViolationRecordId?.customId ?? "";
+        violationHeaderStatus = "Submitted";
       }
 
+      setSaving(false);
+      setLoading(false);
       return result;
     }
     catch(error){
@@ -759,7 +790,7 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
   void updateViolationClauseMode(int index, String mode) async{
     _violationClauses[index].violationMode = mode;
     _violationClauses[index].availableTypes = await getViolationClauseTypesFromMode(mode);
-    _violationClauses[index].violationType = null;
+    _violationClauses[index].violationType = "";
     _violationClauses[index].violationReference = "";
     _violationClauses[index].violationAmount = "";
     _violationClauses[index].violationOccurrence = "";
@@ -828,6 +859,15 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
     return violationTypes;
   }
 
+  void updateViolationClauseError(int index, String field, String error) {
+    if (field == 'type') {
+      violationClauses[index].violationTypeError = error;
+    } else if (field == 'mode') {
+      violationClauses[index].violationModeError = error;
+    }
+    notifyListeners();
+  }
+
   //Violation Attachments
   Future<ActionObject> uploadAttachment(File file) async {
     var actionObject = ActionObject(success: false, message: "Not implemented");
@@ -892,10 +932,14 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
     clearProfessionalInformation();
     clearViolationClauses();
     clearErrorMessage();
+    violationAttachments = [];
+    violationHeaderCustomId = "";
+    violationHeaderStatus = "";
   }
 
   void clearViolationInformation(){
     violationInformation = ViolationInformation(category: "", relatedAuditRequestNumber: "", violationDate: "", violationCapId: "", violationCustomId: "");
+    submittedViolationRecordId = RecordId(id: "", id1: "", id2: "", id3: "", customId: "");
     selectedViolationCategory = "";
   }
 
@@ -917,7 +961,7 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
 
   void clearProfessionalInformation(){
     professionalInformation = ProfessionalInformation(professionalLicenseNumber: "", professionalNameInEnglish: "", professionalNameInArabic: "",
-        professionalCategory: "", professionalMajor: "", professionalProfession: "", professionalLicenseIssueDate: "", professionalLicenseExpiryDate: "");
+        professionalCategory: "", professionalMajor: "", professionalProfession: "", professionalLicenseIssueDate: "", professionalLicenseExpiryDate: "", errorMessage: "");
 
     professionalNameInEnglishController.text = "";
     professionalLicenseNumberController.text = "";
@@ -962,22 +1006,3 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
 
 
 }
-
-
-// setLoading(true);
-// setCriticalErrorMessage("");
-// var res = await AuditVisitsRepository.getAuditVisit(customId);
-// if (!res.success) {
-// setCriticalErrorMessage(res.message);
-// setLoading(false);
-// return;
-// }
-// auditVisit = AuditVisit.fromMap(res.content);
-//
-// clearProviderValues();
-// // for (var inspection in inspectionRecord?.inspections ?? []) {
-// //   inspection.isRecordInspection = true;
-// // }
-// setupInspectionProviders();
-// setLoading(false);
-// notifyListeners();

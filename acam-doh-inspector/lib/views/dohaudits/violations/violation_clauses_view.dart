@@ -1,8 +1,8 @@
-import 'package:aca_mobile_app/views/dohaudits/violations/violation_title_subtitle_view.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 import '../../../data_models/violationCategory.dart';
 import '../../../view_providers/dohaudits/audit_visit_view_provider.dart';
@@ -47,70 +47,69 @@ class ViolationClausesView extends ConsumerWidget {
                   height: 25,
                   color: Colors.grey.shade700,
                 ),
-                Row(
-                  children: [
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 20,
-                          child: Checkbox(
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            visualDensity: VisualDensity.compact,
-                            value: false,
-                            onChanged: (value) =>
-                                {provider.selectAll(value ?? false)},
+                if(provider.isViolationEditable)
+                  Row(
+                    children: [
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            child: Checkbox(
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              visualDensity: VisualDensity.compact,
+                              value: false,
+                              onChanged: (value) =>
+                                  {provider.selectAll(value ?? false)},
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      width: 7,
-                    ),
-                    Text('Select All',
-                        style: Theme.of(context).textTheme.bodySmall!),
-                    const SizedBox(
-                      width: 20,
-                    ),
-                    Expanded(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints.tightFor(height: 30),
-                        child: ElevatedButton(
-                          onPressed: () => ref
-                              .read(auditVisitViewProvider)
-                              .addViolationClause(),
-                          child: Text(
-                            'Add'.tr(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(color: Colors.white),
+                        ],
+                      ),
+                      const SizedBox(
+                        width: 7,
+                      ),
+                      Text('Select All',
+                          style: Theme.of(context).textTheme.bodySmall!),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      Expanded(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints.tightFor(height: 30),
+                          child: ElevatedButton(
+                            onPressed: () => ref.read(auditVisitViewProvider).addViolationClause(),
+                            child: Text(
+                              'Add'.tr(),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium!
+                                  .copyWith(color: Colors.white),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(
-                      width: 20,
-                    ),
-                    Expanded(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints.tightFor(height: 30),
-                        child: ElevatedButton(
-                          onPressed: () => ref
-                              .read(auditVisitViewProvider)
-                              .deleteSelectedViolationClause(),
-                          child: Text(
-                            'Delete'.tr(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(color: Colors.white),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      Expanded(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints.tightFor(height: 30),
+                          child: ElevatedButton(
+                            onPressed: () => ref
+                                .read(auditVisitViewProvider)
+                                .deleteSelectedViolationClause(),
+                            child: Text(
+                              'Delete'.tr(),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium!
+                                  .copyWith(color: Colors.white),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
                 //const SizedBox(height: 10,),
                 Expanded(
                   child: Consumer(
@@ -162,8 +161,8 @@ class ViolationClausesCell extends ConsumerWidget {
         Container(
           width: double.infinity,
           // height: 200,
-          margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
-          padding: EdgeInsets.only(bottom: 10, left: 5),
+          margin: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+          padding: const EdgeInsets.only(bottom: 10, left: 5),
           decoration: BoxDecoration(
             border: Border.all(color: Colors.black, width: 1.5),
             //borderRadius: BorderRadius.circular(5),
@@ -181,126 +180,198 @@ class ViolationClausesCell extends ConsumerWidget {
                       visualDensity: VisualDensity.compact,
                       value: clause.isSelected,
                       onChanged: (value) => {
-                        ref
-                            .read(auditVisitViewProvider)
-                            .toggleSelect(index, value!),
+                        ref.read(auditVisitViewProvider).toggleSelect(index, value!),
                       },
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: InputDecorator(
-                          decoration: InputDecoration(
-                            contentPadding:
-                                const EdgeInsets.fromLTRB(8, 4, 8, 4),
-                            fillColor: Colors.white,
-                            filled: true,
-                            // enabledBorder: OutlineInputBorder(
-                            //   borderSide: BorderSide(color: themeNotifier.light3Color, width: 0.0),
-                            // ),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: clause.violationMode,
-                              elevation: 16,
-                              isExpanded: true,
-                              style: TextStyle(
-                                  color: Theme.of(context).primaryColor),
-                              onChanged: (String? value) {
-                                if (value != null) {
-                                  ref
-                                      .read(auditVisitViewProvider)
-                                      .updateViolationClauseMode(index, value);
-                                }
-                              },
-                              icon: Icon(
-                                Icons.keyboard_arrow_down,
-                                color: Colors.grey.shade800,
-                              ),
-                              items: [
-                                DropdownMenuItem<String>(
-                                  value: "",
-                                  child: Text("Select Violation Mode".tr(),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineMedium),
-                                ),
-                                ...provider.violationClauseModes.map<DropdownMenuItem<String>>((ViolationCategory item) {
-                                  return DropdownMenuItem<String>(
-                                    value: item.value,
-                                    child: AutoSizeText(
-                                      item.text,
-                                      minFontSize: 11,
-                                      stepGranularity: 1,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineMedium,
-                                    ),
-                                  );
-                                }).toList()
-                              ],
-                            ),
-                          )),
                     ),
                   ),
                 ],
               ),
-              Text('Select', style: Theme.of(context).textTheme.bodySmall!),
-              SizedBox(
-                height: 10,
-              ),
+
               Padding(
                 padding: const EdgeInsets.only(right: 10.0),
                 child: InputDecorator(
-                    decoration: InputDecoration(
+                      decoration: const InputDecoration(
+                        contentPadding:
+                        EdgeInsets.fromLTRB(8, 4, 8, 4),
+                        fillColor: Colors.white,
+                        filled: true,
+                        // enabledBorder: OutlineInputBorder(
+                        //   borderSide: BorderSide(color: themeNotifier.light3Color, width: 0.0),
+                        // ),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: clause.violationMode.isEmpty ? null : clause.violationMode,
+                          elevation: 16,
+                          isExpanded: true,
+                          hint: Text("Select Violation Mode".tr()),
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: Theme.of(context).hintColor, // Optional: make it look like a placeholder
+                          ),
+                          onChanged: (String? value) {
+                            if (value != null) {
+                              ref.read(auditVisitViewProvider).updateViolationClauseMode(index, value);
+                            }
+                          },
+                          icon: Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.grey.shade800,
+                          ),
+                          items: [
+                            ...provider.violationClauseModes.map<DropdownMenuItem<String>>((ViolationCategory item) {
+                              return DropdownMenuItem<String>(
+                                value: item.value,
+                                child: AutoSizeText(
+                                  item.text,
+                                  minFontSize: 11,
+                                  stepGranularity: 1,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium,
+                                ),
+                              );
+                            }).toList()
+                          ],
+                        ),
+                      )
+                  ),
+              ),
+
+              const SizedBox(height: 1, ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Violation Mode')
+                    ],
+                  ),
+                  const SizedBox(width: 40),
+                  Column(
+                    children: [
+                      Text(
+                        clause.violationModeError,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                            color: Colors.red
+                        ),
+                      )
+                    ],
+                  )
+                ]
+              ),
+
+              const SizedBox( height: 10),
+              Padding(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: DropdownSearch<String>(
+                  selectedItem: clause.violationType.isEmpty ? null : clause.violationType,
+                  popupProps: PopupProps.menu(
+                    showSearchBox: true,
+                    searchFieldProps: const TextFieldProps(
+                      decoration: InputDecoration(
+                        hintText: "Search violation type",
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ),
+                    ),
+                    itemBuilder: (context, item, isSelected) {
+                      final index = clause.availableTypes.indexWhere((e) => e.value == item);
+                      return Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        color: index.isOdd ? Colors.grey[200] : Colors.grey[300],
+                        child: Text(clause.availableTypes[index].text),
+                      );
+                    },
+                  ),
+                  dropdownDecoratorProps: DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
                       contentPadding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
                       fillColor: Colors.white,
                       filled: true,
+                      hintText: "Select Violation Type".tr(),
                     ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: clause.violationType,
-                        elevation: 16,
-                        isExpanded: true,
-                        style: TextStyle(color: Theme.of(context).primaryColor),
-                        onChanged: (String? value) {
-                          if (value != null) {
-                            ref
-                                .read(auditVisitViewProvider)
-                                .updateViolationClauseType(index, value);
-                          }
-                        },
-                        icon: Icon(
-                          Icons.keyboard_arrow_down,
-                          color: Colors.grey.shade800,
+                  ),
+                  onChanged: (String? value) {
+                    if (value != null) {
+                      ref.read(auditVisitViewProvider).updateViolationClauseType(index, value);
+                    }
+                  },
+                  items: clause.availableTypes.map((e) => e.value).toList(),
+                  dropdownBuilder: (context, selectedItem) {
+                    final item = clause.availableTypes.firstWhere(
+                          (e) => e.value == selectedItem,
+                          orElse: () => ViolationCategory(text: "", value: ""),
+                    );
+                    return Text(selectedItem == null ? "Select Violation Type".tr() : item.text);
+                  },
+                ),
+              ),
+
+              // Padding(
+              //   padding: const EdgeInsets.only(right: 10.0),
+              //   child: InputDecorator(
+              //       decoration: const InputDecoration(
+              //         contentPadding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+              //         fillColor: Colors.white,
+              //         filled: true,
+              //       ),
+              //       child: DropdownButtonHideUnderline(
+              //         child: DropdownButton<String>(
+              //           value: clause.violationType.isEmpty ? null : clause.violationType,
+              //           elevation: 16,
+              //           isExpanded: true,
+              //           hint: Text("Select Violation Type".tr()),
+              //           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              //             color: Theme.of(context).hintColor, // Optional: make it look like a placeholder
+              //           ),
+              //           onChanged: (String? value) {
+              //             if (value != null) {
+              //               ref.read(auditVisitViewProvider).updateViolationClauseType(index, value);
+              //             }
+              //           },
+              //           icon: Icon(
+              //             Icons.keyboard_arrow_down,
+              //             color: Colors.grey.shade800,
+              //           ),
+              //           items: [
+              //             ...clause.availableTypes.map((e) => DropdownMenuItem(value: e.value, child: Text(e.text))).toList(),
+              //           ],
+              //         ),
+              //       )),
+              // ),
+
+              const SizedBox( height: 1),
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Violation Type')
+                    ],
+                  ),
+                const SizedBox(width: 40),
+                  Column(
+                    children: [
+                      Text(
+                        clause.violationTypeError,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                            color: Colors.red
                         ),
-                        items: [
-                          DropdownMenuItem<String>(
-                            value: "",
-                            child: Text("Select Violation Type".tr(),
-                                style:
-                                    Theme.of(context).textTheme.headlineMedium),
-                          ),
-                          ...clause.availableTypes
-                              .map((e) => DropdownMenuItem(
-                                  value: e.value, child: Text(e.text)))
-                              .toList(),
-                        ],
-                      ),
-                    )),
-              ),
-              const SizedBox(
-                height: 1,
-              ),
-              const Text(
-                'Violation Type',
-              ),
-              const SizedBox(
-                height: 10,
-              ),
+                      )
+                    ],
+                  )
+              ]),
+
+              const SizedBox(height: 10),
+
               Row(
                 children: [
                   Expanded(

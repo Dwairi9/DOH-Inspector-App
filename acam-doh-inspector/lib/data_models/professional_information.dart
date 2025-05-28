@@ -7,6 +7,7 @@ class ProfessionalInformation{
   final String professionalProfession;
   final String professionalLicenseIssueDate;
   final String professionalLicenseExpiryDate;
+  final String errorMessage;
 
   ProfessionalInformation({
     required this.professionalLicenseNumber,
@@ -17,6 +18,7 @@ class ProfessionalInformation{
     required this.professionalProfession,
     required this.professionalLicenseIssueDate,
     required this.professionalLicenseExpiryDate,
+    required this.errorMessage
   });
 
   factory ProfessionalInformation.fromMap(Map<String, dynamic> map) {
@@ -28,7 +30,8 @@ class ProfessionalInformation{
         professionalMajor: map['major'] ?? '',
         professionalProfession: map['professional'] ?? '',
         professionalLicenseIssueDate: map['professionalLicenseIssueDate'] ?? '',
-        professionalLicenseExpiryDate: map['professionalLicenseExpiryDate'] ?? ''
+        professionalLicenseExpiryDate: map['professionalLicenseExpiryDate'] ?? '',
+        errorMessage: map['errorMessage'] ?? ''
     );
   }
 }

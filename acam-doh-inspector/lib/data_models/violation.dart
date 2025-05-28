@@ -6,6 +6,7 @@ import 'package:aca_mobile_app/data_models/violation_information.dart';
 class Violation{
   final String? violationCapId;
   final String? violationCustomId;
+  final String? violationStatus;
   final ViolationInformation? violationInformation;
   final FacilityInformation? facilityInformation;
   final ProfessionalInformation? professionalInformation;
@@ -14,6 +15,7 @@ class Violation{
   Violation({
     required this.violationCapId,
     required this.violationCustomId,
+    required this.violationStatus,
     required this.violationInformation,
     required this.facilityInformation,
     required this.professionalInformation,
@@ -24,6 +26,7 @@ class Violation{
     return Violation(
       violationCapId: map['violationCapId'],
       violationCustomId: map['violationCustomId'],
+      violationStatus: map['violationStatus'],
       violationInformation: map['violationInformation'] != null ? ViolationInformation.fromMap(map['violationInformation']) : null,
       facilityInformation: map['facilityInformation'] != null ? FacilityInformation.fromMap(map['facilityInformation']) : null,
       professionalInformation: map['professionalInformation'] != null ? ProfessionalInformation.fromMap(map['professionalInformation']) : null,

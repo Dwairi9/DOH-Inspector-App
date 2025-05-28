@@ -8,14 +8,12 @@ import 'package:aca_mobile_app/data_models/violation_information.dart';
 import 'package:aca_mobile_app/description/inspection_description.dart';
 import 'package:aca_mobile_app/description/report_description.dart';
 import 'package:aca_mobile_app/network/accela_services.dart';
-import 'package:aca_mobile_app/view_data_objects/dohaudits/audit_visit.dart';
 import 'package:aca_mobile_app/view_data_objects/inspection_result_group.dart';
 import 'package:aca_mobile_app/view_data_objects/inspection_type.dart';
 import 'package:aca_mobile_app/view_data_objects/inspection_type_config.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../data_models/professional_information.dart';
-import '../../data_models/violationCategory.dart';
 import '../../data_models/violation_clause.dart';
 
 enum AuditVisitInspectionDocumentDescription {
@@ -167,19 +165,20 @@ class AuditVisitsRepository {
     return null;
   }
 
-  static Future<ProfessionalInformation?> getViolationProfessionalInfo(String professionalLicenseNumber) async {
-    var result = await AccelaServiceManager.emseRequest('getViolationProfessionalInfo', {"professionalLicenseNumber": professionalLicenseNumber});
+  static Future<ProfessionalInformation?> getViolationProfessionalInfo(String inspectionId, String professionalLicenseNumber) async {
+    var result = await AccelaServiceManager.emseRequest('getViolationProfessionalInfo', {"inspectionId": inspectionId, "professionalLicenseNumber": professionalLicenseNumber});
 
-    if (result.success) {
+    if (result.success && result.content != "Success") {
       return ProfessionalInformation.fromMap(result.content);
     }
+
     return null;
   }
 
   static Future<Violation?> getViolation(String inspectionId) async{
     var result = await AccelaServiceManager.emseRequest('getViolation', {"inspectionId": inspectionId});
 
-    if (result.success) {
+    if (result.success && result.content != "Success") {
       return Violation.fromMap(result.content);
     }
     return null;
@@ -189,8 +188,8 @@ class AuditVisitsRepository {
       ProfessionalInformation? professionalInfo, List<ViolationClause> violationClauses) async {
     var result = await AccelaServiceManager.emseRequest('submitViolation',
         {
-          "violationCapId": violationInfo?.violationCapId,
-          "violationCustomId": violationInfo?.violationCustomId,
+          "violationCapId": violationInfo?.violationCapId ?? "",
+          "violationCustomId": violationInfo?.violationCustomId ?? "",
           "violationInformation": {
             "relatedAuditRequestNumber": violationInfo?.relatedAuditRequestNumber,
             "violationCategory": violationInfo?.category,

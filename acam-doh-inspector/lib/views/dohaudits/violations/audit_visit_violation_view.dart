@@ -39,9 +39,7 @@ class _AuditVisitViolationViewState
       final provider = ref.read(widget.auditVisitViewProvider);
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref
-            .read(widget.auditVisitViewProvider)
-            .initViolationPage(provider.customId);
+        provider.initViolationPage(provider.customId);
       });
 
       _isInit = true;
@@ -62,9 +60,7 @@ class _AuditVisitViolationViewState
                 provider.violationInformation?.violationDate == null
             ? DateFormat('dd/MM/yyyy', locale).format(dateValue)
             : (provider.violationInformation?.violationDate ?? "");
-    var violationDate =
-        DateFormat('dd/MM/yyyy', locale).parse(provider.violationDate ?? "");
-    // provider.violationDate = provider.violationDate.isEmpty ? DateFormat('dd/MM/yyyy', locale).format(dateValue) : provider.violationDate;
+    var violationDate = DateFormat('dd/MM/yyyy', locale).parse(provider.violationDate);
 
     final day = DateFormat('dd', locale).format(violationDate);
     final month = DateFormat('MMM', locale).format(violationDate);
@@ -177,9 +173,10 @@ class _AuditVisitViolationViewState
                   Row(
                     children: [
                       ViolationTitleSubtitleView(
-                          title: widget.auditVisit.customId,
-                          subTitle: 'Related Audit Number',
-                          width: 0.9),
+                        title: widget.auditVisit.customId,
+                        subTitle: 'Related Audit Number',
+                        width: 0.9,
+                        enabled: false),
                       const Spacer(),
                     ],
                   ),
@@ -241,9 +238,8 @@ class _AuditVisitViolationViewState
                         ),
                       )),
 
-                  const SizedBox(
-                    height: 1,
-                  ),
+                  const SizedBox( height: 1),
+
                   Text(
                     'Violation Category',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -251,42 +247,37 @@ class _AuditVisitViolationViewState
                           fontSize: 14,
                         ),
                   ),
+
+                  const SizedBox( height: 10),
+
                   if (provider.selectedViolationCategory == 'Facility') ...[
                     ViolationFacilityWidget(
-                      licenseNumber:
-                          provider.facilityLicenseNumberController.text,
-                      englishName:
-                          provider.facilityNameInEnglishController.text,
+                      licenseNumber: provider.facilityLicenseNumberController.text,
+                      englishName: provider.facilityNameInEnglishController.text,
                       arabicName: provider.facilityNameInArabicController.text,
                       category: provider.facilityCategoryController.text,
                       type: provider.facilityTypeController.text,
                       subType: provider.facilitySubTypeController.text,
-                      licenseIssueDate:
-                          provider.facilityLicenseIssueDateController.text,
-                      licenseExpiryDate:
-                          provider.facilityLicenseExpiryDateController.text,
+                      licenseIssueDate: provider.facilityLicenseIssueDateController.text,
+                      licenseExpiryDate: provider.facilityLicenseExpiryDateController.text,
                       region: provider.facilityRegionController.text,
                       city: provider.facilityCityController.text,
                     )
-                  ] else if (provider.selectedViolationCategory ==
-                      'Professional')
+                  ] else if (provider.selectedViolationCategory == 'Professional')
                     ViolationProfessionalWidget(
-                      licenseNumber:
-                          provider.professionalLicenseNumberController.text,
-                      englishName:
-                          provider.professionalNameInEnglishController.text,
-                      arabicName:
-                          provider.professionalNameInArabicController.text,
+                      licenseNumber: provider.professionalLicenseNumberController.text,
+                      englishName: provider.professionalNameInEnglishController.text,
+                      arabicName: provider.professionalNameInArabicController.text,
                       category: provider.professionalCategoryController.text,
-                      profession:
-                          provider.professionalProfessionController.text,
+                      profession: provider.professionalProfessionController.text,
                       major: provider.professionalMajorController.text,
-                      licenseIssueDate:
-                          provider.professionalLicenseIssueDateController.text,
-                      licenseExpiryDate:
-                          provider.professionalLicenseExpiryDateController.text,
-                      onProfessionalLicenseNumberChanged: (lecenseNumber) {
-                        provider.setProfessionalInfo(lecenseNumber);
+                      licenseIssueDate: provider.professionalLicenseIssueDateController.text,
+                      licenseExpiryDate: provider.professionalLicenseExpiryDateController.text,
+                      onProfessionalLicenseNumberChanged: (lecenseNumber) async {
+                        var actionObject = await provider.setProfessionalInfo(lecenseNumber);
+                        if(!actionObject.success){
+                          provider.setErrorMessage(actionObject.message);
+                        }
                       },
                     ),
                   Divider(
@@ -318,9 +309,7 @@ class _AuditVisitViolationViewState
                   //     hintText: 'Enter the general comment about the violation',
                   //   ),
                   // ),
-                  SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox( height: 20),
                   // TappableListItem(
                   //     themeNotifier: themeNotifier,
                   //     title: 'Section Head Decision'.tr(),
@@ -333,23 +322,23 @@ class _AuditVisitViolationViewState
                   //       // showViolation(context, auditVisit);
                   //     }),
                   TappableListItem(
-                      themeNotifier: themeNotifier,
-                      title: 'Violation Caluses'.tr(),
-                      icon: Icons.notes,
-                      count: 0,
-                      showCount: false,
-                      onTap: () {
-                        showViolationClauses(context, ref);
-                      }),
+                    themeNotifier: themeNotifier,
+                    title: 'Violation Clauses'.tr(),
+                    icon: Icons.notes,
+                    count: provider.violationClauses.length,
+                    showCount: true,
+                    onTap: () {
+                      showViolationClauses(context, ref);
+                    }),
                   TappableListItem(
-                      themeNotifier: themeNotifier,
-                      title: 'Attachments'.tr(),
-                      icon: Icons.attachment,
-                      count: 0,
-                      showCount: false,
-                      onTap: () {
-                        showViolationAttachments(context);
-                      }),
+                    themeNotifier: themeNotifier,
+                    title: 'Attachments'.tr(),
+                    icon: Icons.attachment,
+                    count: provider.violationAttachments.length,
+                    showCount: true,
+                    onTap: () {
+                      showViolationAttachments(context);
+                    }),
                   // TappableListItem(
                   //     themeNotifier: themeNotifier,
                   //     title: 'Signature'.tr(),
@@ -368,9 +357,7 @@ class _AuditVisitViolationViewState
                   //     onTap: () {
                   //       showViolationWorkflowDecision(context);
                   //     }),
-                  SizedBox(
-                    height: 50,
-                  ),
+                  const SizedBox( height: 50),
 
                   // if (provider.isLoading)
                   //   Container(
@@ -429,21 +416,40 @@ class _AuditVisitViolationViewState
   // }
 
   showViolationClauses(context, WidgetRef ref) {
+    final provider = ref.watch(widget.auditVisitViewProvider);
+
     WidgetUtil.showFullScreenDialog(
         context,
         ViolationClausesView(
           auditVisitViewProvider: widget.auditVisitViewProvider,
         ),
         "Violation Clauses".tr(),
-        subtitle: 'PTL-HAVR-2024-0001385 - In Progress',
+        subtitle: "${provider.violationHeaderCustomId} - ${provider.violationHeaderStatus}",
         [
-          FullScreenActionButton(
-              title: "Save".tr(),
-              callback: (context, loader) async {
-                Navigator.of(context, rootNavigator: true).pop();
-              })
+          if(provider.isViolationEditable)
+            FullScreenActionButton(title: "Save".tr(),
+                callback: (context, loader) async {
+                  bool isValid = true;
+
+                  if(provider.violationClauses.isNotEmpty){
+                    for(var i =0 ; i < provider.violationClauses.length ; i++){
+                      if(provider.violationClauses[i].violationMode.isEmpty){
+                        isValid = false;
+                        provider.updateViolationClauseError(i, 'mode', "Violation Mode is Required".tr());
+                      }
+
+                      if(provider.violationClauses[i].violationType.isEmpty){
+                        isValid = false;
+                        provider.updateViolationClauseError(i, 'type', "Violation Type is Required".tr());
+                      }
+                    }
+                  }
+
+                  if(isValid){
+                    Navigator.of(context, rootNavigator: true).pop();
+                  }
+                })
         ], onClose: (BuildContext context) {
-      final provider = ref.watch(widget.auditVisitViewProvider);
       Navigator.pop(context);
     });
   }
