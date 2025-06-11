@@ -276,43 +276,20 @@ class AuditVisitView extends ConsumerWidget {
     provider.violationHeaderCustomId = auditVisit.customId;
 
     WidgetUtil.showFullScreenDialog(context, AuditVisitViolationView( auditVisit,auditVisitViewProvider: auditVisitViewProvider,),
-        "Violation".tr(), subtitleBuilder: (context){
-          return Consumer(
-              builder: (context, ref, child){
-                final violationProvider = ref.watch(auditVisitViewProvider);
-                final currentValue = "${violationProvider.violationHeaderCustomId} - ${violationProvider.violationHeaderStatus}";
-                return Text(currentValue);
-              });
-        }, [
-      if (auditVisit.editable && provider.isViolationEditable)
-        FullScreenActionButton(
-            title: "Submit".tr(),
-            callback: provider.isSaving ? null :
-              (fullScreenContext, loader) async {
-                 if(provider.isSaving) {
-                   return;
-                 }
-
-                 var actionObject = await provider.submitViolation();
-                 if (actionObject.success) {
-                   if (fullScreenContext.mounted) AcamUtility.showMessageForActionObject(fullScreenContext, actionObject);
-
-                   // provider.loadAuditVisit();
-                   // ref.read(currentAuditVisitListProvider).loadInspections();
-                   // ref.read(previousAuditVisitListProvider).loadInspections();
-
-                    // if (fullScreenContext.mounted) {
-                    //   showViolationAttachments(context, ref);
-                    // }
-                 }
-                 else {
-                  provider.setErrorMessage(actionObject.message);
-                 }
-              })
-    ], onClose: (BuildContext context) {
-      provider.clearViolation();
-      Navigator.pop(context);
-    });
+      "Violation".tr(), subtitleBuilder: (context){
+        return Consumer(
+          builder: (context, ref, child){
+            final violationProvider = ref.watch(auditVisitViewProvider);
+            final currentValue = "${violationProvider.violationHeaderCustomId} - ${violationProvider.violationHeaderStatus}";
+            return Text(currentValue);
+          }
+        );
+      }, [],
+      onClose: (BuildContext context) {
+        provider.clearViolation();
+        Navigator.pop(context);
+      }
+    );
   }
 
   showViolationAttachments(BuildContext context, WidgetRef ref) {

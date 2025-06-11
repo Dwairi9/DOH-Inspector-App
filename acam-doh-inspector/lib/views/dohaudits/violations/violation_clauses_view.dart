@@ -96,14 +96,14 @@ class ViolationClausesView extends ConsumerWidget {
                           constraints: const BoxConstraints.tightFor(height: 30),
                           child: ElevatedButton(
                             onPressed: () => ref
-                                .read(auditVisitViewProvider)
-                                .deleteSelectedViolationClause(),
+                              .read(auditVisitViewProvider)
+                              .deleteSelectedViolationClause(),
                             child: Text(
                               'Delete'.tr(),
                               style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium!
-                                  .copyWith(color: Colors.white),
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(color: Colors.white),
                             ),
                           ),
                         ),
@@ -186,60 +186,60 @@ class ViolationClausesCell extends ConsumerWidget {
                   ),
                 ],
               ),
-
               Padding(
                 padding: const EdgeInsets.only(right: 10.0),
                 child: InputDecorator(
-                      decoration: const InputDecoration(
-                        contentPadding:
-                        EdgeInsets.fromLTRB(8, 4, 8, 4),
-                        fillColor: Colors.white,
-                        filled: true,
-                        // enabledBorder: OutlineInputBorder(
-                        //   borderSide: BorderSide(color: themeNotifier.light3Color, width: 0.0),
-                        // ),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: clause.violationMode.isEmpty ? null : clause.violationMode,
-                          elevation: 16,
-                          isExpanded: true,
-                          hint: Text("Select Violation Mode".tr()),
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: Theme.of(context).hintColor, // Optional: make it look like a placeholder
-                          ),
-                          onChanged: (String? value) {
-                            if (value != null) {
-                              ref.read(auditVisitViewProvider).updateViolationClauseMode(index, value);
-                            }
-                          },
-                          icon: Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Colors.grey.shade800,
-                          ),
-                          items: [
-                            ...provider.violationClauseModes.map<DropdownMenuItem<String>>((ViolationCategory item) {
-                              return DropdownMenuItem<String>(
-                                value: item.value,
-                                child: AutoSizeText(
-                                  item.text,
-                                  minFontSize: 11,
-                                  stepGranularity: 1,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineMedium,
-                                ),
-                              );
-                            }).toList()
-                          ],
-                        ),
-                      )
+                  decoration: const InputDecoration(
+                    contentPadding:
+                    EdgeInsets.fromLTRB(8, 4, 8, 4),
+                    fillColor: Colors.white,
+                    filled: true,
+                    // enabledBorder: OutlineInputBorder(
+                    //   borderSide: BorderSide(color: themeNotifier.light3Color, width: 0.0),
+                    // ),
                   ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: clause.violationMode.isEmpty ? null : clause.violationMode,
+                      elevation: 16,
+                      isExpanded: true,
+                      hint: Text("Select Violation Mode".tr()),
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: Theme.of(context).hintColor, // Optional: make it look like a placeholder
+                      ),
+                      onChanged: (String? value) {
+                        if (value != null) {
+                          ref.read(auditVisitViewProvider).updateViolationClauseMode(index, value);
+                        }
+                      },
+                      icon: Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.grey.shade800,
+                      ),
+                      items: [
+                        ...provider.violationClauseModes.map<DropdownMenuItem<String>>((ViolationCategory item) {
+                          return DropdownMenuItem<String>(
+                            value: item.value,
+                            child: AutoSizeText(
+                              item.text,
+                              minFontSize: 11,
+                              stepGranularity: 1,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineMedium,
+                            ),
+                          );
+                        }).toList()
+                      ],
+                    ),
+                  )
+                ),
               ),
 
               const SizedBox(height: 1, ),
+
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -255,9 +255,9 @@ class ViolationClausesCell extends ConsumerWidget {
                       Text(
                         clause.violationModeError,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14,
-                            color: Colors.red
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          color: Colors.red
                         ),
                       )
                     ],
@@ -266,6 +266,7 @@ class ViolationClausesCell extends ConsumerWidget {
               ),
 
               const SizedBox( height: 10),
+
               Padding(
                 padding: const EdgeInsets.only(right: 10.0),
                 child: DropdownSearch<String>(
@@ -311,39 +312,6 @@ class ViolationClausesCell extends ConsumerWidget {
                 ),
               ),
 
-              // Padding(
-              //   padding: const EdgeInsets.only(right: 10.0),
-              //   child: InputDecorator(
-              //       decoration: const InputDecoration(
-              //         contentPadding: EdgeInsets.fromLTRB(8, 4, 8, 4),
-              //         fillColor: Colors.white,
-              //         filled: true,
-              //       ),
-              //       child: DropdownButtonHideUnderline(
-              //         child: DropdownButton<String>(
-              //           value: clause.violationType.isEmpty ? null : clause.violationType,
-              //           elevation: 16,
-              //           isExpanded: true,
-              //           hint: Text("Select Violation Type".tr()),
-              //           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              //             color: Theme.of(context).hintColor, // Optional: make it look like a placeholder
-              //           ),
-              //           onChanged: (String? value) {
-              //             if (value != null) {
-              //               ref.read(auditVisitViewProvider).updateViolationClauseType(index, value);
-              //             }
-              //           },
-              //           icon: Icon(
-              //             Icons.keyboard_arrow_down,
-              //             color: Colors.grey.shade800,
-              //           ),
-              //           items: [
-              //             ...clause.availableTypes.map((e) => DropdownMenuItem(value: e.value, child: Text(e.text))).toList(),
-              //           ],
-              //         ),
-              //       )),
-              // ),
-
               const SizedBox( height: 1),
 
               Row(
@@ -361,9 +329,9 @@ class ViolationClausesCell extends ConsumerWidget {
                       Text(
                         clause.violationTypeError,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14,
-                            color: Colors.red
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          color: Colors.red
                         ),
                       )
                     ],
@@ -380,93 +348,102 @@ class ViolationClausesCell extends ConsumerWidget {
                       subTitle: 'Violation Reference',
                     ),
                   ),
-                  const SizedBox(
-                    width: 10,
-                  ),
+
+                  const SizedBox( width: 10 ),
+
                   Expanded(
-                      child: ViolationClausesTitleSubtitleView(
-                    title: clause.violationAmount,
-                    subTitle: 'Violation Amount',
-                  )),
-                  const SizedBox(
-                    width: 10,
+                    child: ViolationClausesTitleSubtitleView(
+                      title: clause.violationAmount,
+                      subTitle: 'Violation Amount',
+                    )
                   ),
-                  const Text(
-                    'AED',
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
+
+                  const SizedBox( width: 10 ),
+                  const Text( 'AED' ),
+                  const SizedBox( width: 10 ),
                 ],
               ),
-              const SizedBox(
-                height: 10,
+
+              const SizedBox( height: 10 ),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: ViolationClausesTitleSubtitleView(
+                      title: clause.violationOccurrence,
+                      subTitle: 'Occurrence'
+                    )
+                  ),
+
+                  const SizedBox( width: 10 ),
+
+                  Expanded(
+                    child: ViolationClausesTitleSubtitleView(
+                      title: clause.violationFollowUp,
+                      subTitle: 'Follow Up'
+                    )
+                  ),
+
+                  const SizedBox( width: 10 ),
+                  const Text( 'days' ),
+                  const SizedBox( width: 10 ),
+                ],
               ),
+
+              const SizedBox( height: 10 ),
+
               Row(
                 children: [
                   Expanded(
                       child: ViolationClausesTitleSubtitleView(
-                          title: clause.violationOccurrence,
-                          subTitle: 'Occurrence')),
-                  const SizedBox(
-                    width: 10,
+                          title: clause.violationFeeNumber,
+                          subTitle: 'Number'
+                      )
                   ),
-                  Expanded(
-                      child: ViolationClausesTitleSubtitleView(
-                          title: clause.violationFollowUp,
-                          subTitle: 'Follow Up')),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  const Text(
-                    'days',
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
+
+                  const SizedBox( width: 10 ),
                 ],
               ),
-              const SizedBox(
-                height: 10,
-              ),
+
+              const SizedBox(height: 10 ),
+
               Padding(
-                  padding: EdgeInsets.only(right: 10.0),
-                  child: ViolationClausesTitleSubtitleView(
-                    title: clause.violationAction,
-                    subTitle: 'Action',
-                  )),
-              const SizedBox(
-                height: 10,
+                padding: const EdgeInsets.only(right: 10.0),
+                child: ViolationClausesTitleSubtitleView(
+                  title: clause.violationAction,
+                  subTitle: 'Action',
+                )
               ),
+
+              const SizedBox(height: 10),
+
               Padding(
-                  padding: EdgeInsets.only(right: 10.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextField(
-                          controller: clause.violationRemarksController,
-                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
-                              color: Colors.black),
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.all(8),
-                            //errorText: field.valid ? null : "required field".tr(),
-                            //hintText: title,
-                          ),
-                          onChanged: null),
-                      const SizedBox(
-                        height: 1,
-                      ),
-                      Text(
-                        "Remarks",
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: clause.violationRemarksController,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
                           fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
+                          fontSize: 16,
+                          color: Colors.black),
+                      decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.all(8),
                       ),
-                    ],
-                  )
+                      onChanged: null),
+                    const SizedBox(
+                      height: 1,
+                    ),
+                    Text(
+                      "Remarks",
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                )
               ),
             ],
           ),
@@ -475,7 +452,7 @@ class ViolationClausesCell extends ConsumerWidget {
           left: 10,
           top: 12,
           child: Container(
-            padding: EdgeInsets.only(left: 2, right: 2),
+            padding: const EdgeInsets.only(left: 2, right: 2),
             //margin: EdgeInsets.fromLTRB(0, 0,0, 0),
             color: Theme.of(context).scaffoldBackgroundColor,
             child: Text((index + 1).toString(), style: Theme.of(context).textTheme.bodySmall),

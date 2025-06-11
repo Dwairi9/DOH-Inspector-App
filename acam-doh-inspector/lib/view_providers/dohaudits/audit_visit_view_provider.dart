@@ -574,7 +574,7 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
 
           for(var i =0 ; i < _violationClauses.length ; i++){
             _violationClauses[i].availableTypes = await getViolationClauseTypesFromMode( _violationClauses[i].violationMode);
-            _violationClauses[i].violationRemarksController.text = _violationClauses[i].violationRemarks;
+            _violationClauses[i].violationRemarksController.text = _violationClauses[i].violationRemarks == "" || _violationClauses[i].violationRemarks == "null" ? "" : _violationClauses[i].violationRemarks;
             _violationClauses[i].violationAction = _violationClauses[i].violationAction == "" || _violationClauses[i].violationAction == "null" ? "" : _violationClauses[i].violationAction;
             _violationClauses[i].violationRemarks = _violationClauses[i].violationRemarks == "" || _violationClauses[i].violationRemarks == "null" ? "" : _violationClauses[i].violationRemarks;
           }
@@ -744,6 +744,11 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
         setLoading(false);
         return ActionObject(success: false, message: "Please Enter a Professional License Number".tr());
       }
+      else if (selectedViolationCategory == 'Facility' && facilityLicenseNumberController.text.isEmpty){
+        setSaving(false);
+        setLoading(false);
+        return ActionObject(success: false, message: "Please Enter a Facility License Number".tr());
+      }
 
       if (_violationClauses.isEmpty) {
         setSaving(false);
@@ -816,6 +821,7 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
       _violationClauses[index].violationOccurrence = (violationItemDetails["occurrence"] ?? 0.0 as double?)?.toInt().toString() ?? '0';
       _violationClauses[index].violationFollowUp = double.tryParse(violationItemDetails["followUpDays"]?.toString() ?? '')?.toInt().toString() ?? '0';
       _violationClauses[index].violationAction = violationItemDetails["action"];
+      _violationClauses[index].violationFeeNumber = double.tryParse(violationItemDetails["number"]?.toString() ?? '')?.toInt().toString() ?? '0';
 
       setLoading(false);
       notifyListeners();
@@ -935,6 +941,7 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
     violationAttachments = [];
     violationHeaderCustomId = "";
     violationHeaderStatus = "";
+    isViolationEditable = true;
   }
 
   void clearViolationInformation(){

@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aca_mobile_app/utility/utility.dart';
 
 import '../../../data_models/violationCategory.dart';
+import '../../../view_widgets/acam_utility.dart';
 import 'violation_title_subtitle_view.dart';
 
 class AuditVisitViolationView extends ConsumerStatefulWidget {
@@ -81,6 +82,51 @@ class _AuditVisitViolationViewState
                       infoMessageProvider: provider.infoMessageProvider),
 
                   const SizedBox(height: 10),
+                  if(provider.isViolationEditable)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child:
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(24.0, 8, 24, 8),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: ElevatedButton(
+                                onPressed: (provider.isSaving || provider.isLoading) ? null  :
+                                  () async {
+                                    try {
+                                      if(provider.isSaving) {
+                                        return;
+                                      }
+
+                                      var actionObject = await provider.submitViolation();
+                                      if (actionObject.success) {
+                                        AcamUtility.showMessageForActionObject(context, actionObject);
+
+                                        // provider.loadAuditVisit();
+                                        // ref.read(currentAuditVisitListProvider).loadInspections();
+                                        // ref.read(previousAuditVisitListProvider).loadInspections();
+
+                                        // if (fullScreenContext.mounted) {
+                                        //   showViolationAttachments(context, ref);
+                                        // }
+                                      }
+                                      else {
+                                        provider.setErrorMessage(actionObject.message);
+                                      }
+                                    } catch (ex) {}
+                                },
+                                child: Text("Submit".tr()),
+                              )
+                            ),
+                          )
+                        )
+                      ],
+                    ),
+
+                  const SizedBox(height: 10),
+
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -99,7 +145,7 @@ class _AuditVisitViolationViewState
                           ),
                         ],
                       )),
-                      SizedBox(width: 50),
+                      const SizedBox(width: 50),
                       Expanded(
                         child: Column(
                           children: [

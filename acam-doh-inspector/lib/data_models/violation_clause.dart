@@ -15,6 +15,7 @@ class ViolationClause{
   String violationFollowUp = "";
   String violationAction = "";
   String violationRemarks = "";
+  String violationFeeNumber = "";
 
   TextEditingController violationRemarksController = TextEditingController();
 
@@ -31,6 +32,7 @@ class ViolationClause{
     this.violationFollowUp = "",
     this.violationAction = "",
     this.violationRemarks = "",
+    this.violationFeeNumber = "",
     violationRemarksController
   });
 
@@ -43,7 +45,8 @@ class ViolationClause{
       violationOccurrence: map['occurrence'] ?? '',
       violationFollowUp: map['followUpDays'] ?? '',
       violationAction: map['action'] ?? '',
-      violationRemarks: map['remarks'] ?? ''
+      violationRemarks: map['remarks'] ?? '',
+      violationFeeNumber: map['number'] ?? '',
     );
   }
 
@@ -56,7 +59,8 @@ class ViolationClause{
       'remarks': violationRemarks,
       'occurrence': violationOccurrence,
       'followUpDays': violationFollowUp,
-      'action': violationAction
+      'action': violationAction,
+      'number': violationFeeNumber
     };
   }
 }
