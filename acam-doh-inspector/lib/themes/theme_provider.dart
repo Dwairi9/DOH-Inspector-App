@@ -384,7 +384,7 @@ class ThemeNotifier extends ChangeNotifier {
           return Color(parseColor(jsonTheme['checkboxTheme']['fillColor']));
         }),
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         titleTextStyle: TextStyle(
           color: Color(parseColor(jsonTheme['dialogTheme']['titleTextStyle']['color'])),
           fontSize: double.parse(jsonTheme['dialogTheme']['titleTextStyle']['fontSize']),
@@ -424,7 +424,7 @@ class ThemeNotifier extends ChangeNotifier {
         color: Color(parseColor(jsonTheme['iconTheme']['color'])),
       ),
       scaffoldBackgroundColor: Color(parseColor(jsonTheme['scaffoldBackgroundColor'])),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: double.parse(jsonTheme['cardTheme']['elevation'].toString()),
         color: Color(parseColor(jsonTheme['cardTheme']['color'])),
       ),

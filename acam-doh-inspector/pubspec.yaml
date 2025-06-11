@@ -28,7 +28,7 @@ dependencies:
   dio: ^5.2.1+1
   flutter_riverpod: ^1.0.4
   cached_network_image: ^3.2.2
-  intl: ^0.19.0
+  intl: ^0.20.2
   path_provider: ^2.0.11
   image_picker: ^1.0.4
   mime: ^1.0.2
@@ -46,7 +46,6 @@ dependencies:
   scroll_to_index: ^3.0.1
   internet_connection_checker: ^1.0.0+1
   table_calendar: ^3.0.9
-  flutter_jailbreak_detection: ^1.10.0
   flutter_secure_storage: ^9.0.0
   dropdown_search: ^5.0.2
   http_certificate_pinning:
@@ -54,8 +53,10 @@ dependencies:
       url: https://github.com/Diefferson/http_certificate_pinning.git
       ref: master
   url_launcher: ^6.2.1
+  flutter_jailbreak_detection: ^1.10.0
   
 dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
 
@@ -131,3 +132,12 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/doh_logo_app_store.png" # Path to your icon file
+  # Optional additional configurations:
+  # adaptive_icon_background: "#FFFFFF"
+  # adaptive_icon_foreground: "assets/icon/icon_foreground.png"
