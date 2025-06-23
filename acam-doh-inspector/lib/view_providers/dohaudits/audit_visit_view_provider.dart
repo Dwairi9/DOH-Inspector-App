@@ -73,6 +73,8 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
   RecordId? submittedViolationRecordId;
   String violationHeaderCustomId = "";
   String violationHeaderStatus = "";
+  bool canAddAttachment = false;
+  bool canMoveTask = false;
   // Violation? existingViolation;
 
   List<ViolationCategory> violationCategories = [];
@@ -529,12 +531,16 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
 
       var violation = await AuditVisitsRepository.getViolation(customId);
       if(violation != null){
+        canAddAttachment = true;
+        canMoveTask = true;
+
         submittedViolationRecordId = RecordId(id: violation.violationCapId ?? "", customId: violation.violationCustomId ?? "");
         violationHeaderCustomId = violation.violationCustomId ?? "";
         violationHeaderStatus = violation.violationStatus ?? "";
 
-        if(violation.violationStatus != "Submitted"){
+        if(violation.violationStatus != "Submitted" && violation.violationStatus != "Clarification Required"){
           isViolationEditable = false;
+          canMoveTask = false;
         }
 
         violationInformation = violation.violationInformation;
@@ -733,28 +739,12 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
       clearErrorMessage();
       setSaving(true);
 
-      if (selectedViolationCategory.isEmpty) {
-        setSaving(false);
-        setLoading(false);
-        return ActionObject(success: false, message: "Please Select a Violation Category".tr());
-      }
-
-      if (selectedViolationCategory == 'Professional' && professionalLicenseNumberController.text.isEmpty) {
-        setSaving(false);
-        setLoading(false);
-        return ActionObject(success: false, message: "Please Enter a Professional License Number".tr());
-      }
-      else if (selectedViolationCategory == 'Facility' && facilityLicenseNumberController.text.isEmpty){
-        setSaving(false);
-        setLoading(false);
-        return ActionObject(success: false, message: "Please Enter a Facility License Number".tr());
-      }
-
-      if (_violationClauses.isEmpty) {
+      var validationErrorMessage = validateForm();
+      if(validationErrorMessage.isNotEmpty){
         setSaving(false);
         setLoading(false);
 
-        return ActionObject(success: false, message: "Please Enter at least one violation clause".tr());
+        return ActionObject(success: false, message: validationErrorMessage);
       }
 
       for(var i =0 ; i < _violationClauses.length ; i++){
@@ -768,7 +758,13 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
         submittedViolationRecordId = RecordId.fromMap(result.content);
 
         violationHeaderCustomId = submittedViolationRecordId?.customId ?? "";
-        violationHeaderStatus = "Submitted";
+        violationHeaderStatus = violationHeaderStatus == "Submitted" ? "Submitted" : "Clarification Required";
+        canAddAttachment = true;
+        canMoveTask= true;
+      }
+      else if(violationHeaderStatus != "Clarification Required"){
+        canAddAttachment = false;
+        canMoveTask= false;
       }
 
       setSaving(false);
@@ -779,6 +775,48 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
       setLoading(false);
       return ActionObject(success: false, message: "Something went wrong, try again later!".tr());
     }
+  }
+
+  Future<ActionObject> moveTaskToSectionHead() async{
+    setLoading(true);
+
+    var submitResult = await submitViolation();
+    if(!submitResult.success){
+      setSaving(false);
+      setLoading(false);
+
+      return submitResult;
+    }
+
+    var result = await AuditVisitsRepository.moveTaskToSectionHead(violationHeaderCustomId);
+
+    isViolationEditable = false;
+    canMoveTask = false;
+    violationHeaderStatus = "In Progress";
+
+    isSaving = false;
+    setLoading(false);
+
+    return result;
+  }
+
+  String validateForm(){
+    if (selectedViolationCategory.isEmpty) {
+      return "Please Select a Violation Category".tr();
+    }
+
+    if (selectedViolationCategory == 'Professional' && professionalLicenseNumberController.text.isEmpty) {
+      return "Please Enter a Professional License Number".tr();
+    }
+    else if (selectedViolationCategory == 'Facility' && facilityLicenseNumberController.text.isEmpty){
+      return "Please Enter a Facility License Number".tr();
+    }
+
+    if (_violationClauses.isEmpty) {
+      return "Please Enter at least one violation clause".tr();
+    }
+
+    return "";
   }
 
   // ******* Violation Clauses
@@ -942,6 +980,8 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
     violationHeaderCustomId = "";
     violationHeaderStatus = "";
     isViolationEditable = true;
+    canMoveTask= false;
+    canAddAttachment = false;
   }
 
   void clearViolationInformation(){

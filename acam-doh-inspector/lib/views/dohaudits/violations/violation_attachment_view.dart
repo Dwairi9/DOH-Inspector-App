@@ -150,7 +150,7 @@ class ViolationAttachmentView extends ConsumerWidget {
                           .headlineMedium
                           ?.copyWith(color: themeNotifier.light4Color),
                     ),
-                    if (!provider.isReadOnly)
+                    if (provider.isViolationEditable)
                       Text(
                         'Tap on Add Attachment button to add attachments'.tr(),
                         style: Theme.of(context)
