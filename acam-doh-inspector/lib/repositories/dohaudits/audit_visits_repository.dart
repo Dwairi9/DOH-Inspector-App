@@ -228,6 +228,15 @@ class AuditVisitsRepository {
     return ActionObject(success: false, message: result.message);
   }
 
+  static Future<ActionObject> moveTaskToSectionHead(customId) async{
+    var result = await AccelaServiceManager.emseRequest('moveTaskToSectionHead', { "customId": customId  });
+
+    if (result.success) {
+      return ActionObject(success: true, message: "Violation transferred to Section Head".tr(), content: result.content);
+    }
+    return ActionObject(success: false, message: result.message);
+  }
+
   //********* Violation Clause
   static Future<ActionObject<dynamic>> getViolationClauseModeList(String userId, String lang) async {
     var result =  await AccelaServiceManager.emseRequest('getViolationModeList', {"userId": userId, "lang": lang});

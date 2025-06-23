@@ -127,6 +127,42 @@ class _AuditVisitViolationViewState
 
                   const SizedBox(height: 10),
 
+                  if(provider.canMoveTask)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child:
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24.0, 8, 24, 8),
+                          child: SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: ElevatedButton(
+                                onPressed: (provider.isSaving || provider.isLoading) ? null  : () async {
+                                  try {
+                                    if(provider.isSaving) {
+                                      return;
+                                    }
+
+                                    var actionObject = await provider.moveTaskToSectionHead();
+                                    if (actionObject.success) {
+                                      AcamUtility.showMessageForActionObject(context, actionObject);
+                                    }
+                                    else {
+                                      provider.setErrorMessage(actionObject.message);
+                                    }
+                                  } catch (ex) {}
+                                },
+                                child: Text("Move to section head".tr()),
+                              )
+                          ),
+                        )
+                        )
+                      ],
+                    ),
+
+                  const SizedBox(height: 10),
+
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -376,15 +412,17 @@ class _AuditVisitViolationViewState
                     onTap: () {
                       showViolationClauses(context, ref);
                     }),
-                  TappableListItem(
-                    themeNotifier: themeNotifier,
-                    title: 'Attachments'.tr(),
-                    icon: Icons.attachment,
-                    count: provider.violationAttachments.length,
-                    showCount: true,
-                    onTap: () {
-                      showViolationAttachments(context);
-                    }),
+                  if(provider.canAddAttachment)
+                    TappableListItem(
+                        themeNotifier: themeNotifier,
+                        title: 'Attachments'.tr(),
+                        icon: Icons.attachment,
+                        count: provider.violationAttachments.length,
+                        showCount: true,
+                        onTap: () {
+                          showViolationAttachments(context);
+                        }
+                    ),
                   // TappableListItem(
                   //     themeNotifier: themeNotifier,
                   //     title: 'Signature'.tr(),
@@ -465,37 +503,38 @@ class _AuditVisitViolationViewState
     final provider = ref.watch(widget.auditVisitViewProvider);
 
     WidgetUtil.showFullScreenDialog(
-        context,
-        ViolationClausesView(
-          auditVisitViewProvider: widget.auditVisitViewProvider,
-        ),
-        "Violation Clauses".tr(),
-        subtitle: "${provider.violationHeaderCustomId} - ${provider.violationHeaderStatus}",
-        [
-          if(provider.isViolationEditable)
-            FullScreenActionButton(title: "Save".tr(),
-                callback: (context, loader) async {
-                  bool isValid = true;
+      context,
+      ViolationClausesView(
+        auditVisitViewProvider: widget.auditVisitViewProvider,
+      ),
+      "Violation Clauses".tr(),
+      subtitle: "${provider.violationHeaderCustomId} - ${provider.violationHeaderStatus}",
+      [
+        if(provider.isViolationEditable)
+          FullScreenActionButton(title: "Save".tr(),
+            callback: (context, loader) async {
+              bool isValid = true;
 
-                  if(provider.violationClauses.isNotEmpty){
-                    for(var i =0 ; i < provider.violationClauses.length ; i++){
-                      if(provider.violationClauses[i].violationMode.isEmpty){
-                        isValid = false;
-                        provider.updateViolationClauseError(i, 'mode', "Violation Mode is Required".tr());
-                      }
-
-                      if(provider.violationClauses[i].violationType.isEmpty){
-                        isValid = false;
-                        provider.updateViolationClauseError(i, 'type', "Violation Type is Required".tr());
-                      }
-                    }
+              if(provider.violationClauses.isNotEmpty){
+                for(var i =0 ; i < provider.violationClauses.length ; i++){
+                  if(provider.violationClauses[i].violationMode.isEmpty){
+                    isValid = false;
+                    provider.updateViolationClauseError(i, 'mode', "Violation Mode is Required".tr());
                   }
 
-                  if(isValid){
-                    Navigator.of(context, rootNavigator: true).pop();
+                  if(provider.violationClauses[i].violationType.isEmpty){
+                    isValid = false;
+                    provider.updateViolationClauseError(i, 'type', "Violation Type is Required".tr());
                   }
-                })
-        ], onClose: (BuildContext context) {
+                }
+              }
+
+              if(isValid){
+                Navigator.of(context, rootNavigator: true).pop();
+              }
+            }
+          )
+      ], onClose: (BuildContext context) {
       Navigator.pop(context);
     });
   }

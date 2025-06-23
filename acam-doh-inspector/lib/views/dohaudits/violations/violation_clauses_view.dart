@@ -200,7 +200,7 @@ class ViolationClausesCell extends ConsumerWidget {
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
-                      value: clause.violationMode.isEmpty ? null : clause.violationMode,
+                      value: clause.violationMode.isEmpty ? null : !clause.violationMode.contains('No97') ? null : clause.violationMode,
                       elevation: 16,
                       isExpanded: true,
                       hint: Text("Select Violation Mode".tr()),

@@ -133,11 +133,14 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
 
+platforms:
+  android:
+  ios:
+
 flutter_launcher_icons:
   android: true
   ios: true
-  remove_alpha_ios: true
-  image_path: "assets/doh_logo_app_store.png" # Path to your icon file
+  image_path: "assets/doh_logo_app_store_white.png" # Specifically for iOS
   # Optional additional configurations:
   # adaptive_icon_background: "#FFFFFF"
   # adaptive_icon_foreground: "assets/icon/icon_foreground.png"
