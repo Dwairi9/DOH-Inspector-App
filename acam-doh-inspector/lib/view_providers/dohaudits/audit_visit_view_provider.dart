@@ -757,8 +757,11 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
       if(result.success){
         submittedViolationRecordId = RecordId.fromMap(result.content);
 
+        violationInformation?.violationCapId = submittedViolationRecordId?.id ?? null;
+        violationInformation?.violationCustomId = submittedViolationRecordId?.customId ?? null;
+
         violationHeaderCustomId = submittedViolationRecordId?.customId ?? "";
-        violationHeaderStatus = violationHeaderStatus == "Submitted" ? "Submitted" : "Clarification Required";
+        violationHeaderStatus = violationHeaderStatus == "Submitted" || violationHeaderStatus.isEmpty ? "Submitted" : "Clarification Required";
         canAddAttachment = true;
         canMoveTask= true;
       }
