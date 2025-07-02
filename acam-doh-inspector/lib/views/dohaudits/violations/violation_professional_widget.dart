@@ -71,7 +71,7 @@ class ViolationProfessionalWidget extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ViolationTitleSubtitleView(title: licenseIssueDate, subTitle: 'Professional License Expiry Date', width: 0.9, enabled: false),
+            ViolationTitleSubtitleView(title: licenseExpiryDate, subTitle: 'Professional License Expiry Date', width: 0.9, enabled: false),
           ],),
         const SizedBox(height: 10,),
       ],
