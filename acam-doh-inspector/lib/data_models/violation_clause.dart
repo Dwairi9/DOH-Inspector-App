@@ -7,6 +7,8 @@ class ViolationClause{
   String violationModeError;
   String violationType;
   String violationTypeError;
+  String violationDate;
+
   List<ViolationCategory> availableTypes;
 
   String violationReference = "";
@@ -33,6 +35,7 @@ class ViolationClause{
     this.violationAction = "",
     this.violationRemarks = "",
     this.violationFeeNumber = "",
+    this.violationDate = "",
     violationRemarksController
   });
 
@@ -47,6 +50,7 @@ class ViolationClause{
       violationAction: map['action'] ?? '',
       violationRemarks: map['remarks'] ?? '',
       violationFeeNumber: map['number'] ?? '',
+      violationDate: map['violationDate'] ?? '',
     );
   }
 
@@ -56,6 +60,7 @@ class ViolationClause{
       'violationMode': violationMode,
       'violationType': violationType,
       'violationAmount': violationAmount,
+      'violationDate': violationDate,
       'remarks': violationRemarks,
       'occurrence': violationOccurrence,
       'followUpDays': violationFollowUp,

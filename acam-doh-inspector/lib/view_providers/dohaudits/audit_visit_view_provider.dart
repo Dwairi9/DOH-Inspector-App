@@ -747,8 +747,12 @@ class AuditVisitViewProvider extends ChangeNotifier implements AttachmentObserve
         return ActionObject(success: false, message: validationErrorMessage);
       }
 
+      DateTime dateValue = DateTime.now();
+
       for(var i =0 ; i < _violationClauses.length ; i++){
         _violationClauses[i].violationRemarks = _violationClauses[i].violationRemarksController.text;
+        _violationClauses[i].violationDate = _violationClauses[i].violationDate == ""
+            ? DateFormat('MM/dd/yyyy', 'en_US').format(dateValue) : (_violationClauses[i].violationDate);
       }
 
       violationInformation = ViolationInformation(relatedAuditRequestNumber: customId, category: selectedViolationCategory, violationDate: violationDate, violationCapId: violationInformation?.violationCapId, violationCustomId: violationInformation?.violationCustomId);
